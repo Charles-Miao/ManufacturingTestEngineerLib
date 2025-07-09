@@ -111,18 +111,54 @@ REM 以无配置文件和绕过执行策略的方式运行Set-Wallpaper.ps1脚�
 - Start FAT.bat
 
 #### FAT.bat
+- UnzipATS，若当前脚本所在目录下存在 ATS.zip 文件，则调用 7z.exe 解压到 C 盘根目录，覆盖已有文件
+- PCBSN，使用wmic获取PCBA SN
+- STATIONRESULT，设定测试结果文件路径
+- TargetIP，获取DHCP Server IP
+- GetStation，向 MES 系统发送 POST 请求，查询测试站记录，并将%Station%设定为对应站别[FAT/FRT/FFT/SWDL]
+- GetToolVer，从mes回复的信息中获取工具版本号
+- GetTool，删除tool目录，重新解压%toolver%.7z
+- DeleteData，删除tool生成的相关数据
+- 如果是FRT/FFT/SWDL站别，则调起FRT.bat/FFT.bat/SWDL.bat
+- FloatMode，用于设置浮动模式
+- DisableLid，用于禁用盖子功能
+- 删除所有无线局域网配置文件
+- NoteBookTest.exe N69528_FAT
+
+#### FRT.bat
+- 获取toolver，并检查tool目录是否存在
+- CheckProcess，检查notebook.exe进程，如果存在则检查30次，否则结束此进程（逻辑奇怪）
+- 清除系统事件日志
+- GetOEMString3，oemstring不管是不是“FBMTL”，都调起一样的工具（逻辑奇怪）
+- NoteBookTest.exe N69528_FRT_4H
 
 ### Burn-in LED
 
-### FFT自动测试 
+### FFT
+#### FFT.bat
+- 获取toolver，并检查tool目录是否存在
+- FloatMode，定义进入电池浮动模式
+- ExitLidTestMode，退出盖子测试模式
+- SetFanTestMode，进入风扇测试模式，设置风扇转速
+- 强制删除注册表中指定路径下的键值
+- igc.exe，用途未知
+- NoteBookTest.exe N69528_FFT
+- 退出风扇测试模式
 
-### RF
+#### RF
 - [测试原理和调试方法](https://github.com/Charles-Miao/ManufacturingTestEngineerLib/tree/master/Branded/RF/测试原理和调试方法.md)
 
-### Audio
+#### Audio
 
 ### SWDL2
+#### SWDL.bat
+- 获取toolver，并检查tool目录是否存在
+- CopyFFTLog, 复制FFT日志
+- FloatMode, 进入浮动模式
+- Wmic Baseboard Get SerialNumber /Value, 读取PCBSN
+- GetWO, 获取工单信息
+- NoteBookTest.exe N69528_SWDL/ N69528_SWDL_NoWriteOA3, 写入or不写OA3
 
-### OA3
+#### OA3
 
 ### MES交互逻辑&卡控
