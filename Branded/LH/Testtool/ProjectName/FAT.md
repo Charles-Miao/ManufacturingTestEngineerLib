@@ -58,16 +58,16 @@ graph TD
 MESToPEC\MESToPEC.exe使用说明：
 
 读取偏移量：0bh 来自 c:\windows\bootstat.dat 时：
-WingTechMesToPE.exe "BOOTCHK"
+XXX.exe "BOOTCHK"
 
 上传文件时：
-WingTechMesToPE.exe "UPLOAD" "strLocalFile" "strRemoteFile"
+XXX.exe "UPLOAD" "strLocalFile" "strRemoteFile"
 
 下载文件时：
-WingTechMesToPE.exe "DOWNLOAD" "strLocalFile" "strRemoteFile"
+XXX.exe "DOWNLOAD" "strLocalFile" "strRemoteFile"
 
 与MES交互时：
-WingTechMesToPE.exe "string1" "string2" "string3"
+XXX.exe "string1" "string2" "string3"
 
 "string1": 指定MES方法名称：
     "WI1012" - 获取BtMac, WiFiMac, IMEI, PcbSN, UUID
