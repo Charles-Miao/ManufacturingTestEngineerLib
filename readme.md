@@ -369,14 +369,33 @@ if exist c:\oem\MFGPE.tag goto MFGPE2
 :FACLAST rem shipmode.cmd-->MFGDONE.cmd, fail call exitshipmode.cmd-->QRcode.cmd, fail call exitshipmode.cmd
 shutdown
 ```
-
-#### shipmode.cmd
-
-#### MFGDONE.cmd
-
-#### QRcode.cmd
-
-#### exitshipmode.cmd
+```batch
+rem shipmode.cmd
+rem %MESPSI_Injection%不等于Y，也不等于N，goto setshipmode
+rem %MESPSI_BIOS_FLAG%不等于空，则继续执行
+HUAWEIPSI.exe -w %MESPSI_BIOS_FLAG%  REM 调用 HUAWEIPSI.exe 工具，将 MESPSI_BIOS_FLAG 的值写入
+HUAWEIPSI.exe -r rem 确认MESPSI_BIOS_FLAG正常写入
+:setshipmode rem 使用DumpIO.exe将机台设定为shipmode
+```
+```batch
+rem MFGDONE.cmd
+:SecureBoot rem 确认SecureBoot Enable，则goto MFGMODE
+:EXITMFGMODE rem 使用DumpIO.exe退出制造模式
+```
+```batch
+rem QRcode.cmd
+:PXETOHDD
+Wmic Baseboard Get SerialNumber /Value rem 获取MBSN
+Wmic bios Get SerialNumber /Value rem 获取整机SN
+:Get_MesLine rem 透过mes获取line信息
+:Update_SFC rem 透过mes获取测试结果SFC_OK/SFC_OK_SOBE/SFC_OK_FOBE，赋值QRcodeMSG=PASS/SOBE/FOBE
+x:\QRcode_check\QRcode_check.exe !QRcodeMSG!,%FGSN%3,%FGSN%,%WO%,%productName%  REM 调用 QRcode_check.exe 工具，显示QRcodeMSG/FASN/WO/ProductName等信息
+:Lid_Close_exit rem 使用DumpIO.exe工具设定lid close mode reopen
+```
+```batch
+rem exitshipmode.cmd
+:exitshipmode rem 使用DumpIO.exe退出shipmode
+```
 
 #### DUT_Config_Check_0625-cxl.CMD
 ```batch
@@ -395,8 +414,46 @@ shutdown
 :SetToMFGMode rem 设置制造模式
 :settarget rem 设置目标电池容量80
 :enterCALIBRATION rem 进入电池校准模式
-:Getbattery
+:Getbattery rem 获取当前电池容量
+:Station_check rem SWDL2 工位检查
+:CHKINFO rem 检查系统 SN 与 MES 获取的 SN 是否匹配
+:OA3ExistCheck rem 流程图参见https://github.com/Charles-Miao/ManufacturingTestEngineerLib/tree/master/Branded/DL2/Shipping_Image/ProjectName/MEStools/AMD64/MOPSPE/OA3ExistCheck.md，围绕MES回复的3个参数returnmsftpkid,returnort,islink，确认SET OA3_Exist=YES
+:SMBIOSCHECK rem smbios检查并与mes SMBIOS_TYPE2_Product/SMBIOS_TYPE11_String1/SKUNumber_MES比对
+:SKUNumber_PreloadType rem 获取PreloadType，并与mes SMBIOS_TYPE1_SKUNumber比对
+:CHKBIOS-ECVer rem 检查 BIOS 和 EC 版本信息
+:ParsePreloadVer rem 从mes回复%SW_VER%中提取出%preloadver%
+:CHKCPU rem 和mes比对的部分已经被注释掉
+:CHKRAM rem 和mes比对内存大小
+:CHKSSD rem 和mes比对SSD大小
+:CHKME rem Check ME Lock state
+:LPLoaddef rem 调用 InsydeH2OUVE\H2OUVE-W-CONSOLEx64.exe 工具，Load default setup language to EN-US
+:BIOSLoadDefault rem 调用 HWOemWMIMethod.exe 工具，进行 BIOS 加载默认设置操作
+:MOPS rem download shipping image, 调用 X:\PreloadGuide\MOPS.cmd 脚本，传入 AOD 路径、模块路径和日志文件路径参数；调用 W:\SWWORK\WinpeDoWork.cmd 脚本，传入 AOD 路径参数
+:EXITSUCCESS rem wpeutil reboot 重启 WinPE 环境, 为什么reboot后还有后面的代码？
+:createEFIPar rem 调用diskpart指令初始化S盘, 拷贝BOOT_MOPS(USB启动文件)到S盘
+:BootOrder_HDD_USB_PXE rem BootFromPE
+:Check_BIOS_Exist rem 检查 BIOS 文件是否存在
+:Download_BIOS rem 下载 BIOS 文件, 实际服务器上的BIOS文件夹为空？
+:startFlashBIOS rem start /w %bios_file% ，启动刷 BIOS 程序并等待其执行完成，后续逻辑有问题？
+:LockME rem fptw64.exe -closemnf -Y>LOCKME.TXT，调用 fptw64.exe 工具，Lock ME --> wpeutil reboot，重启 WinPE 环境
 ```
+```batch
+:BootOrder_HDD_USB_PXE
+HWOemWMIMethod.exe 5 1 50    >> %LOGPATH%  REM 调用 HWOemWMIMethod.exe 工具，检查可引导设备信息，将结果追加到日志文件中
+find /i "index[00]:00 index[01]:00" %LOGPATH%  REM 在日志文件中查找 "index[00]:00 index[01]:00"，以便Check Bootable Device
+bcdedit /enum {default}>bcddump.txt  REM 调用 bcdedit 工具，枚举默认启动项，将结果保存到 bcddump.txt 文件中
+find /i "{ramdiskoptions}" bcddump.txt  REM 在 bcddump.txt 文件中查找 "{ramdiskoptions}"，以便entry in BCD,no need to create WinPE again
+rem 确认服务器和本地存不存在BOOT_MOPS文件夹，以便重新拷贝，或者goto fail
+REM 将boot.sdi，BootFromPE.cmd ，boot.wim复制到 c:\BOOT_MOPS\ 目录
+call c:\BOOT_MOPS\BootFromPE.cmd %LOGPATH%  REM 调用 c:\BOOT_MOPS\BootFromPE.cmd 脚本，传入日志文件路径参数
+```
+
+#### call X:\PreloadGuide\MOPS.cmd %AODPATH% %MODULEPATH% %LOGPATH%
+
+#### call W:\SWWORK\WinpeDoWork.cmd %AODPATH% %AODPATH%
+
+#### call c:\BOOT_MOPS\BootFromPE.cmd
+
 ### OA3
 
 ### MES交互逻辑&卡控
