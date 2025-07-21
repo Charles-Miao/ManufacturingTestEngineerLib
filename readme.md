@@ -137,7 +137,23 @@ call NoteBookTest.exe N69528_FAT
 
 #### NoteBookTest.exe N69528_FAT
 - FlashBiosTest 
+```C#
+//检查 AC 状态，WtDevTool.exe -GetBatteryPowerInfo
+//确认离线模式，读取配置档mMainCfg.AbsoluteSysCfg.MESCfg.EnableOnLine
+//获取电池电量百分比，WtDevTool.exe -GetBatteryPowerInfo
+//设置电池浮动模式，开启工厂模式，通过inpout32.dll设定对应EC Address的Data
+//获取本地 BIOS 版本信息，WtDevTool.exe -CheckSMBIOS
+//flashBiosCount是记录 BIOS 刷写次数的文件
+//DeleteRunExe，删除启动项"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp"
+//DownloadBiosBin，创建 FTP 客户端实例FtpClient ftp（连接，获取列表，下载，断开连接）
+//SetRunExe，将现有正在执行的NoteBook.exe设定为开机启动项
+//执行OtherTool\BiosUnlock\Bios_unLock.exe
+//执行下载的BIOS文件，OtherTool\FlashBios\*.exe
+```
 - Disktest
+```C#
+
+```
 - MainBoardTest
 - METest
 - TPMTest
@@ -363,14 +379,14 @@ call autorun.cmd
 rem Wmic bios Get SerialNumber /Value, 通过 WMI 获取系统序列号
 rem ImageWhitelist.exe，获取%Whitelist%机种名称
 call BOM.bat
-if exist c:\oem\MFGPE.tag goto MFGPE2
+if exist c:\oem\MFGPE.tag goto MFGPE2？
 :MFGPE1 rem 拷贝服务器脚本-->遍历目标目录中所有的*.cmd，并执行DUT_Config_Check_0625-cxl.cmd %whiteList%-->call pcw_preload.exe preloader.ini-->goto pass
 :MFGPE2 rem 拷贝服务器脚本-->遍历目标目录中所有的*.cmd，并执行DUT_Config_Check_0625-cxl.cmd-->拷贝QRcode_check-->删除C:\sources,C:\temp,C:\AMD,C:\HW*,C:\oem,隐藏C:\PerfLogs,C:\Data
 :FACLAST rem shipmode.cmd-->MFGDONE.cmd, fail call exitshipmode.cmd-->QRcode.cmd, fail call exitshipmode.cmd
 shutdown
 ```
 ```batch
-rem shipmode.cmd
+rem shipmode.cmd？
 rem %MESPSI_Injection%不等于Y，也不等于N，goto setshipmode
 rem %MESPSI_BIOS_FLAG%不等于空，则继续执行
 HUAWEIPSI.exe -w %MESPSI_BIOS_FLAG%  REM 调用 HUAWEIPSI.exe 工具，将 MESPSI_BIOS_FLAG 的值写入
@@ -417,7 +433,7 @@ rem exitshipmode.cmd
 :Getbattery rem 获取当前电池容量
 :Station_check rem SWDL2 工位检查
 :CHKINFO rem 检查系统 SN 与 MES 获取的 SN 是否匹配
-:OA3ExistCheck rem 流程图参见https://github.com/Charles-Miao/ManufacturingTestEngineerLib/tree/master/Branded/DL2/Shipping_Image/ProjectName/MEStools/AMD64/MOPSPE/OA3ExistCheck.md，围绕MES回复的3个参数returnmsftpkid,returnort,islink，确认SET OA3_Exist=YES
+:OA3ExistCheck rem 流程图参见https://github.com/Charles-Miao/ManufacturingTestEngineerLib/tree/master/Branded/DL2/Shipping_Image/ProjectName/MEStools/AMD64/MOPSPE/OA3ExistCheck.md，围绕MES回复的3个参数returnmsftpkid,returnort,islink，确认SET OA3_Exist=YES？
 :SMBIOSCHECK rem smbios检查并与mes SMBIOS_TYPE2_Product/SMBIOS_TYPE11_String1/SKUNumber_MES比对
 :SKUNumber_PreloadType rem 获取PreloadType，并与mes SMBIOS_TYPE1_SKUNumber比对
 :CHKBIOS-ECVer rem 检查 BIOS 和 EC 版本信息
@@ -431,7 +447,7 @@ rem exitshipmode.cmd
 :MOPS rem download shipping image, 调用 X:\PreloadGuide\MOPS.cmd 脚本，传入 AOD 路径、模块路径和日志文件路径参数；调用 W:\SWWORK\WinpeDoWork.cmd 脚本，传入 AOD 路径参数
 :EXITSUCCESS rem wpeutil reboot 重启 WinPE 环境, 为什么reboot后还有后面的代码？
 :createEFIPar rem 调用diskpart指令初始化S盘, 拷贝BOOT_MOPS(USB启动文件)到S盘
-:BootOrder_HDD_USB_PXE rem BootFromPE
+:BootOrder_HDD_USB_PXE rem BootFromPE，使用bcdedit.exe工具将机台设定为从PE启动
 :Check_BIOS_Exist rem 检查 BIOS 文件是否存在
 :Download_BIOS rem 下载 BIOS 文件, 实际服务器上的BIOS文件夹为空？
 :startFlashBIOS rem start /w %bios_file% ，启动刷 BIOS 程序并等待其执行完成，后续逻辑有问题？
@@ -449,11 +465,21 @@ call c:\BOOT_MOPS\BootFromPE.cmd %LOGPATH%  REM 调用 c:\BOOT_MOPS\BootFromPE.c
 ```
 
 #### call X:\PreloadGuide\MOPS.cmd %AODPATH% %MODULEPATH% %LOGPATH%
+```batch
+:ImageWhiteListCheck rem 使用ImageWhitelist.exe读取BIOS中的机种名，并和AODSTAT.DAT读取的机种名进行比对，如果不一致则fail
+:AODMD5Verify rem MD5Verify.exe -f AODSTAT.DAT -c AODSTAT.md5，确认AODSTAT.DAT文件的MD5值和AODSTAT.md5中的值一致
+:MD5Verify rem MD5Verify.exe -f %BETAMODULESPATH%\!modulename!.zip -v %%j，确认每个module文件的MD5值是否和AODSTAT.DAT中的一致，并将模块名称写入对应的 wt_modules_%%a.txt 文件，其中%%a对应各个module的module type，通常为Filter/0/1/2/3/4
+:RUNMOPS rem call :ParseCRI Filter 
+:Start rem call :ParseCRI %Type%，其中%Type%为0~4循环执行
+:ParseCRI rem 获取module对应CRI文件中的%stdout%，执行解压和setup.cmd
+rem stdout=7z.exe x j:\FBPartitionCheck02CN.zip -y -pWingtech -ox:\
+rem stdout=x:\DiskFormatCheck\setup.cmd %AODPATH%
+```
 
-#### call W:\SWWORK\WinpeDoWork.cmd %AODPATH% %AODPATH%
+#### call W:\SWWORK\WinpeDoWork.cmd %AODPATH% %AODPATH%？
 
-#### call c:\BOOT_MOPS\BootFromPE.cmd
+#### x:\DiskFormatCheck\setup.cmd %AODPATH%？
 
-### OA3
+### OA3 process
 
 ### MES交互逻辑&卡控
