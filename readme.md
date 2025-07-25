@@ -152,13 +152,108 @@ call NoteBookTest.exe N69528_FAT
 ```
 - Disktest
 ```C#
-//
+//GetLocalDiskInfo，WtDevTool.exe -GetDiskInfo 1
+//过滤移动硬盘，只保留非移动硬盘
+//根据配置档是否启用硬盘数量检查，需要则检查，不需要则不检查
+//根据配置档是否启用硬盘总容量检查，需要则检查，不需要则不检查
+//CheckMESDiskInfo函数，检查UnsafeShutdownsCount/PowerCycleCount/PowerOnHours/CRCErrCount/FirmwareRevision(如果FW不一致，则调用OtherTool\SSDFW\SSDUpdateTool.exe升级固件版本)/ModelName硬盘型号名称
 ```
 - MainBoardTest
+```C#
+//检查 AC 状态，WtDevTool.exe -GetBatteryPowerInfo
+//检查驱动状态，WtDevTool.exe -CheckDeviceList 0 {0}
+//SetRTCTime()，执行 RTC 测试
+//设定RTC时间，透过Out32给EC下指令，如果设置后的时间与当前时间差值小于 5 秒，则设置成功
+//检查RTC时间，透过Out32给EC下指令，如果获取的 RTC 时间与当前时间差值在允许范围内，则检查通过
+//InitSMBIOSData()，"WtDevTools.exe -CheckSMBIOS 1"读取的BIOS信息中的BIOS版本和EC版本使用wmic读取版本进行替换，以方便后续检查
+//wmic.exe bios get smbiosbiosversion /Value
+//WMIC.exe bios Get EmbeddedControllerMajorVersion /Value
+//WMIC.exe bios Get EmbeddedControllerMinorVersion /Value
+//BIOSInfoCheck()
+//比较 SMBIOS 中的 BIOS 供应商信息和配置中的信息
+//如果 MES 在线且 BIOS 版本信息为空，则标记测试失败并返回
+//如果 BIOS 版本信息不为空，则检查 BIOS 版本信息
+//如果系统 BIOS 版本信息不为空，则检查系统 BIOS 版本信息
+//如果 MES 在线且 EC 固件版本信息为空，则标记测试失败并返回
+//如果 EC 固件版本信息不为空，则检查 EC 固件版本信息
+//比较 SMBIOS 中的系统产品名称信息和配置中的信息
+//比较 SMBIOS 中的系统 SKU 编号信息和配置中的信息
+//比较 SMBIOS 中的系统家族信息和配置中的信息
+//比较 SMBIOS 中的主板产品名称信息和配置中的信息
+//比较 SMBIOS 中的主板制造商信息和配置中的信息
+//比较 SMBIOS 中的主板资产标签编号信息和配置中的信息
+//CPUInfoCheck()
+//比较 SMBIOS 中的 CPU 版本信息和 MES 中的信息
+//比较 SMBIOS 中的 CPU 最大速度信息和配置中的信息
+//比较 SMBIOS 中的 CPU 当前速度信息和配置中的信息
+//MemoryInfoCheck()
+//比较本地内存总大小和配置中的信息
+//比较内存Speed和配置中的信息
+//检查内存PartNumber是否在配置列表中
+//PDFWCheck()，使用OtherTool\PDFW\TypeCDump.exe读取PD FW并与MES比对
+//GPUInfoCheck()
+//InitGPUData()，使用WtDevTools.exe -GetGpuInfo 1获取GPU信息
+//GetDeviceIds(), WtDevTools.exe -GetHardwareId "Microsoft Basic Render Driver"
+//GPU VBIOS 版本信息不为空且 MES 中的 GPU 型号名称信息为空
+//GPU 型号名称信息不为空且本地 GPU VBIOS 版本信息为空
+//检查配置中是否包含本地 GPU 设备 ID 信息
+//检查配置中的 GPU 型号名称信息和本地信息
+//检查配置中的 GPU 供应商 ID 信息和本地信息
+//如果是NVIDIA GPU则检查配置中的 GPU VRAM 信息和本地信息
+//检查配置中的 GPU VBIOS 版本信息和本地信息
+//DcBoot()
+//OtherTool\HuaweiECtool\HuaweiECtool.exe /ecpower /get_type，获取 EC 电源类型，是否包含 "DC"
+//OtherTool\HuaweiECtool\HuaweiECtool.exe /ecpower /get_time，获取 EC 电源时间，是否电源时间为 255
+//ThermalSensorCheck(), 各个sensor的温度范围需要在1~100
+//GetAllTemperature(), 读取各个sensor的温度，CPU_DTS/ PCH/ NTC_CHARGER/ NTC_CPU/ NTC_DDR/ NTC_CPUVR/ NTC_5V/ NTC_AMBIENCE/ NTC_TYPEC/ NTC_PowerVR
+//ReadTemperatureData(), 透过Out32给EC下指令, 读取各个sensor的温度
+//VrFwCheck()
+//VrUpdateFw()，透过Out32给EC下指令更新 VR FW
+//透过Out32给EC下指令获取本地VR CRC值localCrcValue
+//OtherTool\CheckRPMC\CheckRPMC.exe rm FE0B00FC 1, 获取cpuType
+//根据 CPU 类型设置CRC值crcValue
+//比较本地CRC值localCrcValue和标准CRC值crcValue
+```
 - METest
+```C#
+//OtherTool\METools\MEInfo64\MEInfoWin64.exe -FEAT "FW Version", 获取fwversion, 并与 MES 中的版本比对
+//OtherTool\METools\MEManuf64\MEManufWin64.exe -VERBOSE, 检查获取到的结果
+//OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe -R "Intel(R) ICPS Entitlement Eligible", Read icps status
+//如果ICPS 标志位为 0，从WO中读取
+//OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe -u -n "Intel(R) ICPS Entitlement Eligible" -v Disabled, 禁用 ICPS 
+//OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe -commit -noreset
+//重启计算机
+//如果 ICPS 标志位为 1
+//OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe -u -n "Intel(R) ICPS Entitlement Eligible" -v Enabled, 启用 ICPS
+//OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe -commit -noreset
+//重启计算机
+//ME Close
+//OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe -R "NVAR Configuration State", CHK ME CLOSE
+//OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe -CLOSEMNF -NORESET -Y, 关闭ME
+//set Mfg, 执行 EC 命令设置 Mfg 状态
+//OtherTool\\InsydeH2OUVE\\H2OUVE-W-CONSOLEx64.exe -l, BIOS load default
+```
 - TPMTest
+```C#
+//FTPM Check
+//(Get-CimInstance Win32_ComputerSystem).OEMStringArray[3], 使用 PowerShell 命令获取主板型号信息
+//(Get-TPM).TpmPresent, 使用 PowerShell 命令获取 TPM 是否存在的信息
+//Start Tpm Provision
+//mountvol.exe s: /s, 执行 mountvol 命令挂载虚拟磁盘
+//OtherTool\\efishell\\efishell.bat
+//重启计算机
+//修改设置
+//OtherTool\\InsydeH2OUVE\\H2OUVE-W-CONSOLEx64.exe -ms -fi "TXT" -op "Enable", 执行 UVE 工具命令，启用 TXT 设置
+//OtherTool\\InsydeH2OUVE\\H2OUVE-W-CONSOLEx64.exe -ms -fi "Allow Microsoft 3rd Party UEFI CA" -op "Enable",执行 UVE 工具命令，启用允许 Microsoft 3rd Party UEFI CA 设置
+```
 - FanTest
+```C#
+
+```
 - KeyboardTest
+```C#
+
+```
 - ClickpadTest
 - LCDTest
 - CameraTest
