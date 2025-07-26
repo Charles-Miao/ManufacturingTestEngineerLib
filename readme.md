@@ -248,13 +248,37 @@ call NoteBookTest.exe N69528_FAT
 ```
 - FanTest
 ```C#
-
+//FanTestEnzo()
+//执行EC指令，SetFanTestMode
+//执行EC指令，SetFanSpeed
+//OtherTool\CheckRPMC\CheckRPMC.exe rm FE0B002C 4，ReadAllFanRPM
+//EnableRunInTestFan, 使用如上方法分别进行低速/中速/高速风扇测试
+//EnableTestSingleFan, SFT Fan Speed, 调用风扇控制测试方法进行单风扇低速测试
+//如果未设定EnableRunInTestFan/EnableTestSingleFan，则使用如上方法分别进行低速/中速/高速风扇测试
+//若所有测试都通过，将风扇速度设为 0
+//调用 EC 命令将风扇测试模式设为 false
+//Fan Noise Test
+//执行 EC 命令，设置风扇进入测试模式
+//人工反馈测试结果
+// 执行 EC 命令，设置风扇退出测试模式
 ```
 - KeyboardTest
 ```C#
-
+//执行EC命令，设置 Fn 键进入测试模式
+//执行EC命令，设置 Fn 键功能模式
+//OtherTool\BTMCU\FwCmdTool.exe hall status, 执行厂商预操作测试
+//初始化要测试的按键列表
+//在 UI 线程中执行键盘测试界面显示操作
+//显示键盘测试对话框并等待用户操作
+                dlg.ShowDialog();
+//OtherTool\BTMCU\LogTools.exe remove kbd, 执行厂商结束操作测试
+//设置 Fn 键退出测试模式
+//设置 Fn 键退出功能模式
 ```
 - ClickpadTest
+```C#
+
+```
 - LCDTest
 - CameraTest
 - BatteryTest
