@@ -277,16 +277,109 @@ call NoteBookTest.exe N69528_FAT
 ```
 - ClickpadTest
 ```C#
-
+//GetDeviceIds, WtDevTool.exe -GetHardwareId "HID-compliant touch pad"
+//检查和解析MES中的TouchPad固件版本
+//UpdateFwVersion
+//ClickpadVendor.GOODIX, OtherTool\ClickpadFwUpdate\GTModuleTest\GTModuleTest.exe
+//ClickpadVendor.SIPO, OtherTool\ClickPadFW\SIPO_FWUpdate\SIPO_TP_Updater.exe
+//ClickpadVendor.BLTP, OtherTool\ClickpadFwUpdate\BLTP\CmdUpgradeFw_HWID785_V2.14.01_20241008(1154).exe
+//更新完FW之后，重启系统，并将现有进程设为开机启动项目
+//GetFwVersion
+//ClickpadVendor.FTCS, OtherTool\ClickPadFW\FTCS\UpgradeToolV3.exe /s /Ver
+//ClickpadVendor.GOODIX, OtherTool\ClickPadFW\GTModuleTest\GTouchUpdate.exe并未执行
+//ClickpadVendor.SIPO, OtherTool\ClickPadFW\SIPO\SIPO_TP_ReadVer.exe
+//ClickpadVendor.BLTP, OtherTool\ClickPadFW\BLTP\CmdUpgradeFw.exe check 347D 7853 FF00 01
+//检查本地固件版本是否与 MES 中的版本匹配
+//触摸板自检测试
+//ClickpadVendor.GOODIX, OtherTool\ClickPad\GTModuleTest\GTModuleTest.exe(复制配置文件/删除结果/Kill进程/启动工具/超时处理/重试/备份测试日志)
+//ClickpadVendor.SIPO, OtherTool\ClickPad\SIPO\SipoTpChecker.exe
+//ClickpadVendor.BLTP, OtherTool\ClickPad\BLTP\BLTPTest.exe
+//触摸板功能测试, 显示对话框并等待用户操作
+touchpadDlg.ShowDialog();
 ```
 - LCDTest
+```C#
+// 查询无线网卡名称，wmic /namespace:\\root\CIMV2 path Win32_NetworkAdapter get *
+// 检查 DPCD 的功能， 针对包含 "INTEL"无线网卡专用，执行停止 DRTU 进程的批处理文件，UninstallWifiDevices()
+// UninstallWifiDevices，C:\Windows\sysnative\pnputil.exe /remove-device /deviceid "{deviceId}"
+// 如果当前客户为华为且当前工位为 "A_FRT"
+// 停止电池充电
+// 获取电池电量百分比
+// 如果电池电量大于等于 75%, 设置电池进入学习模式
+// GetMonitorInfo(), WtDevTools.exe -GetMonitorList, 并将MonitorId/EDIDDate/EDIDVersion/SerialNumber/MonitorName/EDIDChecksum等信息加入到相应列表中
+// MonitorId Check
+// MonitorName Check
+// EDIDVersion Check
+// SerialNumber Check
+// EDIDChecksum Check
+// Check LCD FW
+// CheckSum()
+// 如果 LCD 类型包含 "EDO1420"则执行OtherTool\LCDCheckSum\EDO\HWDisplayService.exe，获取lcdversion并Check LCD FW Version
+// 如果 LCD 类型包含 "BOE092E"则执行OtherTool\LCDCheckSum\BOE_High_Gamut\Aux_Checksum_tool.exe，获取lcdversion并Check LCD FW Version
+// 如果 LCD 类型包含 "CSO1421"则执行OtherTool\LCDCheckSum\CSOT_Low_Gamut\TCON_DP_UPDATE_TOOL.exe, 获取lcdchecksum Check LCD checksum
+// 如果 LCD 类型包含 "CSO1422"则执行OtherTool\LCDCheckSum\CSOT_High_Gamut\TCON_DP_UPDATE_TOOL.exe，获取lcdchecksum Check LCD checksum
+// DownloadFwFile(), 透过FTP下载FW文件
+// FwUpdate(), 执行升级工具进行固件升级
+GenericFun.GetExecResult(tool, $"upgrade {bin}", 1);
+// EnableBrightnessTest
+dlg.ShowDialog();
+// Enable PictureShow Test
+// 如果无线适配器名称包含 "INTEL"，OtherTool\DRTU\init.bat
+// DRTU -daemon
+// DRTUClient.exe -connect
+// DRTUClient.exe -wifi-stop 
+// DRTUClient.exe -wifi-reset-config 
+// DRTUClient.exe -wifi-tx-send-packets-mode Off 
+// DRTUClient.exe -wifi-mcc-profile US
+// DRTUClient.exe -wifi-set-mcc 
+// DRTUClient.exe -wifi-mode tx_modulated 
+// DRTUClient.exe -wifi-calibrate-tx 
+// DRTUClient.exe -wifi-band 2.4 
+// DRTUClient.exe -wifi-bandwidth 20 
+// DRTUClient.exe -wifi-channel 7
+// DRTUClient.exe -wifi-tx-transm-mode STBC 
+// DRTUClient.exe -wifi-tx-chains A,B 
+// DRTUClient.exe -wifi-rate HT7 
+// DRTUClient.exe -wifi-tx-frame-size 1528 
+// DRTUClient.exe -wifi-duty-cycle 85 
+// DRTUClient.exe -wifi-power-mode Wifi.PowerControl 
+// DRTUClient.exe -wifi-power a,24 
+// DRTUClient.exe -wifi-power b,24 
+// DRTUClient.exe -wifi-start 
+// 如果本地显示器信息中的 MonitorId 包含 "BOE", "BOE low gamut LCD, no need biterror check", 否则ReadLcdLinkErrorDataForBOE() ==>OtherTool\BitErrorCheck\BOE\DP689_Eye_Monitor.bat
+// 如果本地显示器信息中的 MonitorId 包含 "CSO", ReadLcdLinkErrorDataForCSOT() ==> OtherTool\BitErrorCheck\CSOT\RX_BER_Aux_Tool.exe
+// 如果本地显示器信息中的 MonitorId 包含 "EDO", ReadLcdLinkErrorDataForEDO() ==> OtherTool\TconEquipmentTool_PsrState\TconEquipmentTool_PsrState.exe & OtherTool\BitErrorCheck\EDO\HWDisplayService.exe
+// 创建图片显示测试对话框实例(red/ green/ blue/ white/ black/ mt/ L48/ caitiao)
+dlg.ShowDialog();
+// 如果启用了检查 DPCD 的功能, Wait Test Bit Error End
+// Exit DRTU, OtherTool\DRTU\stop_exit4.bat
+// DRTUClient.exe -wifi-stop
+// DRTUClient.exe -disconnect true
+// DRTUClient.exe -exit
+// taskkill /f /im rservice.exe
+// taskkill /f /im DRTU.exe
+// taskkill /f /im cmd.exe /fi "windowtitle eq Administrator:  1"
+// taskkill /f /im cmd.exe /fi "windowtitle eq Administrator:  2"
+// taskkill /f /im cmd.exe /fi "windowtitle eq Administrator:  3"
+// taskkill /f /im cmd.exe /fi "windowtitle eq Administrator:  loopDRTU"
+// taskkill /f /im timeout.exe
+// taskkill /f /im ping.exe
+// devcon remove %WlanHWID%
+// devcon rescan
+```
 - CameraTest
+```C#
+// GetCameraNameAndId(), WtDevTool.exe -CheckDeviceList 1
+// Check Device Id, 检查mes中的camera信息，并与读取到的camera信息进行比对
+// Get Rear Camera SN and Pass to MES
+```
 - BatteryTest
 - WifiTest
 - BluetoothTest
 - FingerPrintTest
 - Touchpanel test
 - WriteNumber
+- WriteNumberCheck
 
 #### FRT.bat
 ```batch
