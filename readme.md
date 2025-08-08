@@ -141,12 +141,15 @@ call NoteBookTest.exe N69528_FAT
 //检查 AC 状态，WtDevTool.exe -GetBatteryPowerInfo
 //确认离线模式，读取配置档mMainCfg.AbsoluteSysCfg.MESCfg.EnableOnLine
 //获取电池电量百分比，WtDevTool.exe -GetBatteryPowerInfo
+#region battery电量小于30%等待
 //设置电池浮动模式，开启工厂模式，通过inpout32.dll设定对应EC Address的Data
+#region Get Local BIOS Version
 //获取本地 BIOS 版本信息，WtDevTool.exe -CheckSMBIOS
 //flashBiosCount是记录 BIOS 刷写次数的文件
 //DeleteRunExe，删除启动项"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp"
 //DownloadBiosBin，创建 FTP 客户端实例FtpClient ftp（连接，获取列表，下载，断开连接）
 //SetRunExe，将现有正在执行的NoteBook.exe设定为开机启动项
+#region 刷正常版本BIOS
 //执行OtherTool\BiosUnlock\Bios_unLock.exe
 //执行下载的BIOS文件，OtherTool\FlashBios\*.exe
 ```
@@ -154,17 +157,22 @@ call NoteBookTest.exe N69528_FAT
 ```C#
 //GetLocalDiskInfo，WtDevTool.exe -GetDiskInfo 1
 //过滤移动硬盘，只保留非移动硬盘
+#region Disk Count
 //根据配置档是否启用硬盘数量检查，需要则检查，不需要则不检查
+#region Disk Total Size
 //根据配置档是否启用硬盘总容量检查，需要则检查，不需要则不检查
+#region Disk Info Check
 //CheckMESDiskInfo函数，检查UnsafeShutdownsCount/PowerCycleCount/PowerOnHours/CRCErrCount/FirmwareRevision(如果FW不一致，则调用OtherTool\SSDFW\SSDUpdateTool.exe升级固件版本)/ModelName硬盘型号名称
 ```
 - MainBoardTest
 ```C#
 //检查 AC 状态，WtDevTool.exe -GetBatteryPowerInfo
 //检查驱动状态，WtDevTool.exe -CheckDeviceList 0 {0}
+#region RTC TEST
 //SetRTCTime()，执行 RTC 测试
 //设定RTC时间，透过Out32给EC下指令，如果设置后的时间与当前时间差值小于 5 秒，则设置成功
 //检查RTC时间，透过Out32给EC下指令，如果获取的 RTC 时间与当前时间差值在允许范围内，则检查通过
+#region BIOS Check
 //InitSMBIOSData()，"WtDevTools.exe -CheckSMBIOS 1"读取的BIOS信息中的BIOS版本和EC版本使用wmic读取版本进行替换，以方便后续检查
 //wmic.exe bios get smbiosbiosversion /Value
 //WMIC.exe bios Get EmbeddedControllerMajorVersion /Value
@@ -182,15 +190,19 @@ call NoteBookTest.exe N69528_FAT
 //比较 SMBIOS 中的主板产品名称信息和配置中的信息
 //比较 SMBIOS 中的主板制造商信息和配置中的信息
 //比较 SMBIOS 中的主板资产标签编号信息和配置中的信息
+#region Processor check
 //CPUInfoCheck()
 //比较 SMBIOS 中的 CPU 版本信息和 MES 中的信息
 //比较 SMBIOS 中的 CPU 最大速度信息和配置中的信息
 //比较 SMBIOS 中的 CPU 当前速度信息和配置中的信息
+#region Memory check
 //MemoryInfoCheck()
 //比较本地内存总大小和配置中的信息
 //比较内存Speed和配置中的信息
 //检查内存PartNumber是否在配置列表中
+#region PD FW Check
 //PDFWCheck()，使用OtherTool\PDFW\TypeCDump.exe读取PD FW并与MES比对
+#region GPU Check
 //GPUInfoCheck()
 //InitGPUData()，使用WtDevTools.exe -GetGpuInfo 1获取GPU信息
 //GetDeviceIds(), WtDevTools.exe -GetHardwareId "Microsoft Basic Render Driver"
@@ -201,12 +213,15 @@ call NoteBookTest.exe N69528_FAT
 //检查配置中的 GPU 供应商 ID 信息和本地信息
 //如果是NVIDIA GPU则检查配置中的 GPU VRAM 信息和本地信息
 //检查配置中的 GPU VBIOS 版本信息和本地信息
+#region EC Power Type
 //DcBoot()
 //OtherTool\HuaweiECtool\HuaweiECtool.exe /ecpower /get_type，获取 EC 电源类型，是否包含 "DC"
 //OtherTool\HuaweiECtool\HuaweiECtool.exe /ecpower /get_time，获取 EC 电源时间，是否电源时间为 255
+#region Thermal Sensor Check
 //ThermalSensorCheck(), 各个sensor的温度范围需要在1~100
 //GetAllTemperature(), 读取各个sensor的温度，CPU_DTS/ PCH/ NTC_CHARGER/ NTC_CPU/ NTC_DDR/ NTC_CPUVR/ NTC_5V/ NTC_AMBIENCE/ NTC_TYPEC/ NTC_PowerVR
 //ReadTemperatureData(), 透过Out32给EC下指令, 读取各个sensor的温度
+#region VR FW Check
 //VrFwCheck()
 //VrUpdateFw()，透过Out32给EC下指令更新 VR FW
 //透过Out32给EC下指令获取本地VR CRC值localCrcValue
@@ -216,6 +231,7 @@ call NoteBookTest.exe N69528_FAT
 ```
 - METest
 ```C#
+#region ME Test
 //OtherTool\METools\MEInfo64\MEInfoWin64.exe -FEAT "FW Version", 获取fwversion, 并与 MES 中的版本比对
 //OtherTool\METools\MEManuf64\MEManufWin64.exe -VERBOSE, 检查获取到的结果
 //OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe -R "Intel(R) ICPS Entitlement Eligible", Read icps status
@@ -235,7 +251,7 @@ call NoteBookTest.exe N69528_FAT
 ```
 - TPMTest
 ```C#
-//FTPM Check
+#region FTPM Check
 //(Get-CimInstance Win32_ComputerSystem).OEMStringArray[3], 使用 PowerShell 命令获取主板型号信息
 //(Get-TPM).TpmPresent, 使用 PowerShell 命令获取 TPM 是否存在的信息
 //Start Tpm Provision
@@ -266,8 +282,11 @@ call NoteBookTest.exe N69528_FAT
 ```C#
 //执行EC命令，设置 Fn 键进入测试模式
 //执行EC命令，设置 Fn 键功能模式
+#region Pre ACTION Test
 //OtherTool\BTMCU\FwCmdTool.exe hall status, 执行厂商预操作测试
+#region Init Test Key List
 //初始化要测试的按键列表
+#region KeyBoard Test Show
 //在 UI 线程中执行键盘测试界面显示操作
 //显示键盘测试对话框并等待用户操作
                 dlg.ShowDialog();
@@ -277,7 +296,9 @@ call NoteBookTest.exe N69528_FAT
 ```
 - ClickpadTest
 ```C#
+#region Get Device ID
 //GetDeviceIds, WtDevTool.exe -GetHardwareId "HID-compliant touch pad"
+#region FW Check
 //检查和解析MES中的TouchPad固件版本
 //UpdateFwVersion
 //ClickpadVendor.GOODIX, OtherTool\ClickpadFwUpdate\GTModuleTest\GTModuleTest.exe
@@ -290,40 +311,48 @@ call NoteBookTest.exe N69528_FAT
 //ClickpadVendor.SIPO, OtherTool\ClickPadFW\SIPO\SIPO_TP_ReadVer.exe
 //ClickpadVendor.BLTP, OtherTool\ClickPadFW\BLTP\CmdUpgradeFw.exe check 347D 7853 FF00 01
 //检查本地固件版本是否与 MES 中的版本匹配
-//触摸板自检测试
+#region Self Test
 //ClickpadVendor.GOODIX, OtherTool\ClickPad\GTModuleTest\GTModuleTest.exe(复制配置文件/删除结果/Kill进程/启动工具/超时处理/重试/备份测试日志)
 //ClickpadVendor.SIPO, OtherTool\ClickPad\SIPO\SipoTpChecker.exe
 //ClickpadVendor.BLTP, OtherTool\ClickPad\BLTP\BLTPTest.exe
+#region Function Test
 //触摸板功能测试, 显示对话框并等待用户操作
 touchpadDlg.ShowDialog();
 ```
 - LCDTest
 ```C#
+#region INTEL 专用
 // 查询无线网卡名称，wmic /namespace:\\root\CIMV2 path Win32_NetworkAdapter get *
 // 检查 DPCD 的功能， 针对包含 "INTEL"无线网卡专用，执行停止 DRTU 进程的批处理文件，UninstallWifiDevices()
 // UninstallWifiDevices，C:\Windows\sysnative\pnputil.exe /remove-device /deviceid "{deviceId}"
+#region Battery Control
 // 如果当前客户为华为且当前工位为 "A_FRT"
 // 停止电池充电
 // 获取电池电量百分比
 // 如果电池电量大于等于 75%, 设置电池进入学习模式
+#region Check Monitor Config
 // GetMonitorInfo(), WtDevTools.exe -GetMonitorList, 并将MonitorId/EDIDDate/EDIDVersion/SerialNumber/MonitorName/EDIDChecksum等信息加入到相应列表中
+#region MonitorId
 // MonitorId Check
+#region MonitorName
 // MonitorName Check
+#region EDIDVersion
 // EDIDVersion Check
+#region SerialNumber
 // SerialNumber Check
+#region EDIDChecksum
 // EDIDChecksum Check
-// Check LCD FW
+#region Check LCD FW
 // CheckSum()
 // 如果 LCD 类型包含 "EDO1420"则执行OtherTool\LCDCheckSum\EDO\HWDisplayService.exe，获取lcdversion并Check LCD FW Version
 // 如果 LCD 类型包含 "BOE092E"则执行OtherTool\LCDCheckSum\BOE_High_Gamut\Aux_Checksum_tool.exe，获取lcdversion并Check LCD FW Version
 // 如果 LCD 类型包含 "CSO1421"则执行OtherTool\LCDCheckSum\CSOT_Low_Gamut\TCON_DP_UPDATE_TOOL.exe, 获取lcdchecksum Check LCD checksum
 // 如果 LCD 类型包含 "CSO1422"则执行OtherTool\LCDCheckSum\CSOT_High_Gamut\TCON_DP_UPDATE_TOOL.exe，获取lcdchecksum Check LCD checksum
 // DownloadFwFile(), 透过FTP下载FW文件
-// FwUpdate(), 执行升级工具进行固件升级
-GenericFun.GetExecResult(tool, $"upgrade {bin}", 1);
-// EnableBrightnessTest
+// FwUpdate(), 执行升级工具进行固件升级, GenericFun.GetExecResult(tool, $"upgrade {bin}", 1);
+#region EnableBrightnessTest
 dlg.ShowDialog();
-// Enable PictureShow Test
+#region Enable PictureShow Test
 // 如果无线适配器名称包含 "INTEL"，OtherTool\DRTU\init.bat
 // DRTU -daemon
 // DRTUClient.exe -connect
@@ -352,7 +381,8 @@ dlg.ShowDialog();
 // 创建图片显示测试对话框实例(red/ green/ blue/ white/ black/ mt/ L48/ caitiao)
 dlg.ShowDialog();
 // 如果启用了检查 DPCD 的功能, Wait Test Bit Error End
-// Exit DRTU, OtherTool\DRTU\stop_exit4.bat
+#region Exit DRTU
+// OtherTool\DRTU\stop_exit4.bat
 // DRTUClient.exe -wifi-stop
 // DRTUClient.exe -disconnect true
 // DRTUClient.exe -exit
@@ -369,11 +399,46 @@ dlg.ShowDialog();
 ```
 - CameraTest
 ```C#
-// GetCameraNameAndId(), WtDevTool.exe -CheckDeviceList 1
-// Check Device Id, 检查mes中的camera信息，并与读取到的camera信息进行比对
-// Get Rear Camera SN and Pass to MES
+#region Get Cam Name + DevId
+// GetCameraNameAndId(), WtDevTool.exe -CheckDeviceList 1 (rear Camera/ Front Camera/ USB Camera)
+#region Check Device Id
+// 检查mes中的camera信息，并与读取到的camera信息进行比对
+#region Get Rear Camera SN and Pass to MES
+// OtherTool\CameraEEprom\EEPRomTest.exe -r 0 2400 "Camera Sensor Rear"
+#region CycleTest
+// 禁用/启用后置摄像头，禁用/启用前置摄像头，检查摄像头驱动是否有黄色标记
+// C:\Windows\sysnative\pnputil.exe /disable-device /deviceid %rearcameraid%
+// C:\Windows\sysnative\pnputil.exe /enable-device /deviceid %rearcameraid%
+// C:\Windows\sysnative\pnputil.exe /disable-device /deviceid %frontcameraid%
+// C:\Windows\sysnative\pnputil.exe /enable-device /deviceid %frontcameraid%
+// OtherTool\DeviceYellowCheck\DeviceYellowCheck.exe
+#region Camera View
+#region 若为红外摄像头
+// IRCameraTest()
+// 将启动 UWP 应用的命令写入脚本文件, "explorer.exe shell:appsFolder\1d1cd9d5-9968-4df1-a750-16a5123fa763_6994g6hn1sjr2!App"写入OtherTool\IRCamera\uwp.bat
+// 执行 UWP 测试脚本, OtherTool\IRCamera\uwp.bat
+// CameraTestFinalResult(), iqCapturesPath目录下文件为4个则返回true
+// KillIQCapture(), kill IQCapture进程
+// 解析红外摄像头照片亮度
+// FileToBitmap(), 将文件转换为 Bitmap 对象
+// GetPicColorCountAndLightness(), 获取图片的颜色数量和亮度值
+// 若颜色数量大于 80 且亮度值大于 9000
+# region 若为普通摄像头
+// 执行OtherTool\CameraView\CameraView.exe 1 2 0, [参数1：3 isCheckQrcode, 1 isnot check qrcode], [参数3：0 is front camer, 1 is rear camera]
+#region Camera Video record
+// 待实现...
 ```
 - BatteryTest
+```C#
+#region CHECK AC INPUT
+#region 电池生产日期
+#region 电池温度高于门限则等待30分钟，超时Fail
+#region 放电电流测试
+#region 电芯压差
+#region 电池满充容量检测
+#region 放电电量跳变测试
+#region 充电电流测试
+```
 - WifiTest
 - BluetoothTest
 - FingerPrintTest
