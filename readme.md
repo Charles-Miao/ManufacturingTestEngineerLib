@@ -487,7 +487,58 @@ BatteryCapacityRangeControl(15, 50);
 BatteryCapacityRangeControl(15, 95);
 ```
 - WifiTest
+```C#
+#region Get Wifi Adapter
+localWifiName=Generic.GenericFun.QueryWirelessNetworkAdapterName();
+//Powershell指令：Get-CimInstance -Namespace root/CIMV2 -ClassName Win32_NetworkAdapter
+//CMD指令：wmic /namespace:\\root\CIMV2 path Win32_NetworkAdapter get *
+#region Get Wifi Device Id
+// 尝试获取设备 ID、驱动版本和设备 ID 列表，若失败则设置测试状态为失败并发送错误消息
+GetDeviceIds(localWifiName, out driverVersion, out DeviceId, out _IdList)
+// 使用 WlanClient 实例确保 Wifi 接口处于开启状态
+// using 语句确保 WlanClient 对象在使用后自动释放资源（如网络句柄），避免资源泄漏
+// WlanClient()
+// 1. 通过 Windows 原生 WLAN API 打开与无线服务的连接（获取句柄）；
+// 2. 注册一个回调函数，用于监听所有 WLAN 相关的状态变化；
+// 3. 确保在初始化失败时正确释放资源，避免内存泄漏。
+#region Check Device Id
+// 检查本地设备 ID 是否包含 MES 中的设备 ID
+#region Check Wlan Type
+// 检查本地 Wifi 适配器名称是否包含 MES 中的 WLAN 类型
+#region 驱动检查测试
+// C:\Windows\sysnative\pnputil.exe /disable-device /deviceid "你的设备ID"
+// 线程休眠 5 秒
+// C:\Windows\sysnative\pnputil.exe /enable-device /deviceid "你的设备ID"
+// 线程休眠 5 秒
+// 检查设备是否有黄色标记，若有则设置测试状态为失败并发送错误消息
+// 初始化 WlanClient 实例
+// 获取 RSSI 最强的网络 BSS 信息
+// 若 RSSI 值小于配置值，设置测试状态为失败并发送错误消息
+#region Connect Test
+// 执行 Wifi 连接测试，连接上则pass
+#region 检查可用网络数量
+// 若可用网络数量大于等于 3，设置找到标志为 true 并发送成功消息
+#region WIFI RSE TEST
+// 透过powercfg工具，设置电源策略，防止影响 Wifi 性能
+// 尝试进入 TAS 切换模式，若失败则设置测试状态为失败并发送错误消息
+// 检查到位状态，获取测试 SSID 和箱体编号
+// 根据 Wifi 适配器名称创建对应的 Wifi 模块实例
+// INTEL:
+// AntRssiTest()
+// 重启Wifi，检查SSID，获取上下限值
+// 透过EC指令Enable TAS, Disable TAS，调用Ant2GTest(), Ant5GTest()
+// OtherTool\Intel_ant_tool\Ant.exe -network "SSID值" -password "密码值" -ant_all -rssi_loops 10 -th 60
+// REALTEK:
+// OtherTool\Realtek_ant_tool\RtkAntTest.exe
+// 尝试退出 TAS 切换模式，若失败则设置测试状态为失败并发送错误消息
+```
 - BluetoothTest
+```C#
+#region 启用/禁用测试
+// 类似wifi的测试原理，禁用后再启用，然后检查是否有黄标
+#region 蓝牙搜索测试
+#region 蓝牙连接测试
+```
 - FingerPrintTest
 - Touchpanel test
 - WriteNumber
