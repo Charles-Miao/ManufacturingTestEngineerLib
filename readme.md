@@ -546,8 +546,26 @@ GetDeviceIds(localWifiName, out driverVersion, out DeviceId, out _IdList)
 ```
 - FingerPrintTest
 ```C#
+// 获取本地指纹设备类型和设备 ID
+// GetFingerprintTypeAndDeviceId(), WtDevTool.exe -CheckDeviceList 1
 #region Check Device ID
+// 检查本地设备 ID 是否包含 MES 中的设备 ID, 若包含则pass
 #region Self Test
+// 不同的设备类型调用不同的工具
+case FingerprintType.ELAN:
+    fingerTool = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\Fingerprint\Elan\eFSAX System Test Manager.exe";
+case FingerprintType.GOODIX:
+    fingerTool = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\Fingerprint\Goodix\MassProductTest.exe";
+case FingerprintType.GOODIXMOC:
+    fingerTool = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\Fingerprint\GoodixMOC\GFMPTestMOC.exe";
+case FingerprintType.FOCALTECH:
+    fingerTool = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\Fingerprint\FocalTech\FpsensorTestw.exe";
+case FingerprintType.SIL:
+    fingerTool = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\Fingerprint\SIL\ManuTester.exe";
+case FingerprintType.FPC:
+    fingerTool = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\Fingerprint\FPC\FPCProductionTestTool.exe";
+case FingerprintType.EGIS:
+    fingerTool = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\Fingerprint\Egis\HonorPC-ETU906_Fingerprint_Stress_Tool.exe";
 ```
 - Touchpanel test
 - WriteNumber
