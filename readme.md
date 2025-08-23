@@ -537,9 +537,18 @@ GetDeviceIds(localWifiName, out driverVersion, out DeviceId, out _IdList)
 #region 启用/禁用测试
 // 类似wifi的测试原理，禁用后再启用，然后检查是否有黄标
 #region 蓝牙搜索测试
+// FindCommonBluetooth()，该方法通过 Windows 设备管理 API，在指定超时时间内扫描并筛选出 “可配对” 或 “已配对” 的蓝牙设备，收集设备名称和 ID 信息，最终返回这些设备的列表
+// 若找到设备，设置测试状态为通过并发送找到的设备信息
 #region 蓝牙连接测试
+// BluetoothConnectTest()
+// 执行蓝牙 GATT 工具命令，OtherTool\BLEGATT\BlutoothLEGatt.exe /c
+// 若连接测试成功，设置测试状态为通过并发送成功消息
 ```
 - FingerPrintTest
+```C#
+#region Check Device ID
+#region Self Test
+```
 - Touchpanel test
 - WriteNumber
 - WriteNumberCheck
