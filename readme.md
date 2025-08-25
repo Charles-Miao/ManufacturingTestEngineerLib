@@ -567,7 +567,18 @@ case FingerprintType.FPC:
 case FingerprintType.EGIS:
     fingerTool = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\Fingerprint\Egis\HonorPC-ETU906_Fingerprint_Stress_Tool.exe";
 ```
-- Touchpanel test
+- TouchpanelTest
+```C#
+// 若为非触摸屏，则goto TestEnd
+// 触控面板厂商自检测试，不同厂商使用不同的工具
+// FermatBTouch, OtherTool\TouchSelf\FT_MultipleTest.exe
+// EnzoHTouch, OtherTool\TouchSelf\FtMultipleTest_V2.1.exe
+// X80Touch, OtherTool\TPVendorTool\NovatekTouch\Production_Studio.exe
+// D580Touch, OtherTool\TPVendorTool\HxWinTouchMP\HxWinTouchMP.exe
+// 划线测试, OtherTool\TouchTool\TouchLine\TouchLineTest.exe
+// 多指触控测试, OtherTool\TouchTool\MultiTouch\MultiTouchTest.exe
+// 触控面板固件检查, OtherTool\TouchFW\FtGetFwVer_V1.1.exe读取FW版本，并和MES版本进行比对
+```
 - WriteNumber
 - WriteNumberCheck
 
@@ -581,7 +592,7 @@ call NoteBookTest.exe N69528_FRT_4H
 ```
 
 #### NoteBookTest.exe N69528_FRT_4H
-- BatteryTest
+- BatteryTest，同上
 - ColdBootOneTimeTest
 - MemoryTest
 - CheckEcTest
@@ -590,7 +601,7 @@ call NoteBookTest.exe N69528_FRT_4H
 - ColdBootTest
 - CPUTest/S3Test/S4Test
 - GraphicsTest
-- FanTest
+- FanTest，同上
 - OledcheckSumTest
 - ShutdownCheck
 - CheckTimeSequend
