@@ -580,6 +580,158 @@ case FingerprintType.EGIS:
 // 触控面板固件检查, OtherTool\TouchFW\FtGetFwVer_V1.1.exe读取FW版本，并和MES版本进行比对
 ```
 - WriteNumber
+```C#
+// 最底层就是使用FermatB.cs中的方法
+// WriteSMBIOS
+#region Logo设置
+HWLogoSet() //校验logo的SHA256，并执行\OtherTool\Logo\SetLogo.bat
+#region HW Native注入
+HWNativeWrite() //ftp DownloadNativeFile，并执行OtherTool\Native\*.exe
+#region PSI写入
+GetHWPSI3Version() //OtherTool\WtDevTools.exe -RHWPSI3
+ReadHWPSIFlag() //OtherTool\WtDevTools.exe -RWHWPSI R
+WriteHWPSIFlag() //若读取的PSIFlag不正确，则写入，WtDevTools.exe -RWHWPSI W %HwPsiArea% %HwPsiControl% %HwPsiUserRequest%，并重启系统
+HWPSIErase() //若MES PSI ver为空则erase，"%~dp0OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe" -f "%~dp0OtherTool\HWPSI\bin\PSIKeyNull.bin" -A 0xE00000 -L 0x100000 -Y，重启系统
+HWPSIWrite() //若PSI ver错误则写入，"%~dp0OtherTool\METools\FlashTool\WINDOWS64\FPTW64.exe" -f "%localPsiPath%\%psifile%" -A 0xE00000 -L 0x100000 -Y，重启
+#region WriteUUID
+// "%~dp0OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -SU "auto"
+#region BIOS_TYPE0_INFO_VENDOR
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -BVDR %vendername%
+#region BIOS_TYPE1_SYS_INFO_MANUFACTURER
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -SM %manufacturer%
+#region BIOS_TYPE1_SYS_VERSION
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -SV %version%
+#region BIOS_TYPE1_SKUNumber
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -SKU %skunumber%
+#region BIOS_TYPE1_PRODUCT
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -SP %productname%
+#region BIOS_TYPE1_Family
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -SF %family%
+#region BIOS_TYPE2_VERSION
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -BV %version%
+#region BIOS_TYPE2_ASSETTAG
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -W H=2 S=5 V=%assettag%
+#region BIOS_TYPE2_PRODUCT
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -BP %productname%
+#region BIOS_TYPE2_MANUFACTURER
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -BM %manufacturer%
+#region BIOS_TYPE3_ASSETTAGNUM
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -CA %assettagnumber%
+#region BIOS_TYPE3_MANUFACTURER
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -CM %manufacturer%
+#region BIOS_TYPE3_SKUNUMBER
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -CSKU %skunumber%
+#region BIOS_TYPE3_VERSION
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -CV %version%
+#region BIOS_TYPE11_String
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -OS %stringIndex% %content%
+#region Write MBSN
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -BS %ssn%, write
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -BS, read
+#region WriteSSN
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -SS %mbsn%, write
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -CS %mbsn%, write
+// "C:\YourApp\OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe" -SS, read
+#region 上传WIFI/BT MAC
+// OtherTool\WtDevTools.exe -CheckDeviceList 1
+// OtherTool\Bat\getmac.bat
+#region Write OA3
+#region Write NFCKey
+// OtherTool\NFCTool\NFCInfoTool.exe 8
+#region WriteBtMCUMac
+// 无实际作用，直接return TestState.PASS
+#region CheckBtMCUMa 
+// 无实际作用，直接return TestState.PASS
+```
+```mermaid
+flowchart TD
+    Start[开始Write OA3流程] --> CheckConfig{检查OA3配置是否启用}
+    CheckConfig -- 否 --> End[结束]
+    CheckConfig -- 是 --> InitVars[初始化变量]
+    InitVars --> CheckSN{检查序列号是否为空}
+    CheckSN -- 是 --> ErrorSN[发送错误消息: FpSN为空]
+    ErrorSN --> ReturnFail[返回FAIL状态]
+    CheckSN -- 否 --> CreateDirs[创建临时目录结构]
+    CreateDirs --> CheckMESFlag{检查MES OA3标志位}
+    
+    CheckMESFlag -- 需要写入OA3 --> GetOA3Data[获取OA3密钥数据]
+    GetOA3Data --> ValidateData{验证OA3数据有效性}
+    ValidateData -- 无效 --> ErrorData[发送错误消息: 获取OA3数据失败]
+    ErrorData --> ReturnFail
+    ValidateData -- 有效 --> BuildXML[构建OA3配置XML]
+    BuildXML --> DeleteOldXML[删除旧的配置文件]
+    DeleteOldXML --> WriteXML[写入新的XML配置文件]
+    WriteXML --> CheckTool{检查oa3tool.exe是否存在}
+    CheckTool -- 不存在 --> ErrorTool[发送错误消息: oa3tool不存在]
+    ErrorTool --> ReturnFail
+    CheckTool -- 存在 --> DeleteOldBin[删除旧的oa3.bin文件]
+    DeleteOldBin --> CheckConfigFile{检查config.cfg是否存在}
+    CheckConfigFile -- 不存在 --> CreateConfig[创建配置文件]
+    CreateConfig --> CreateBatch[创建构建批处理文件]
+    CheckConfigFile -- 存在 --> CreateBatch
+    CreateBatch --> ExecuteBatch[执行批处理构建OA3]
+    ExecuteBatch --> CheckBin{检查oa3.bin是否生成成功}
+    CheckBin -- 失败 --> ErrorBin[发送错误消息: 创建OA3 bin失败]
+    ErrorBin --> ReturnFail
+    CheckBin -- 成功 --> CopyBin[复制oa3.bin到本地目录]
+    CopyBin --> WriteOA3[调用OA3工厂写入OA3数据]
+    WriteOA3 --> CheckWriteResult{检查写入结果}
+    CheckWriteResult -- 成功 --> RebootSystem[重启系统并退出程序]
+    CheckWriteResult -- 失败 --> CheckErrorType{分析错误类型}
+    CheckErrorType -- 可识别错误 --> SendSpecificError[发送具体错误消息]
+    SendSpecificError --> ReturnFail
+    CheckErrorType -- 其他错误 --> SendGenericError[发送通用错误消息]
+    SendGenericError --> ReturnFail
+    
+    CheckMESFlag -- 不需要写入OA3 --> CheckErrorMsg{检查错误消息}
+    CheckErrorMsg -- 有错误消息 --> SendFlagError[发送OA3标志检查失败错误]
+    SendFlagError --> ReturnFail
+    CheckErrorMsg -- 无错误消息 --> EraseOA3[清除OA3数据]
+    EraseOA3 --> CheckEraseResult{检查清除结果}
+    CheckEraseResult -- 失败 --> SendEraseError[发送清除OA3数据失败错误]
+    SendEraseError --> ReturnFail
+    CheckEraseResult -- 成功 --> SendEraseSuccess[发送清除OA3成功消息]
+    SendEraseSuccess --> AddResult[添加测试结果]
+    
+    RebootSystem --> AddResult
+    SendGenericError --> AddResult
+    SendSpecificError --> AddResult
+    SendEraseSuccess --> AddResult
+    
+    AddResult --> EndProcess[正常结束流程]
+    
+    ReturnFail --> EndProcess
+    
+    subgraph ExceptionHandling[异常处理]
+        Exception[捕获异常] --> SendException[发送异常消息]
+        SendException --> ReturnException[返回FAIL状态]
+    end
+    
+    InitVars -.-> ExceptionHandling
+    CheckSN -.-> ExceptionHandling
+    CreateDirs -.-> ExceptionHandling
+    CheckMESFlag -.-> ExceptionHandling
+    GetOA3Data -.-> ExceptionHandling
+    ValidateData -.-> ExceptionHandling
+    BuildXML -.-> ExceptionHandling
+    DeleteOldXML -.-> ExceptionHandling
+    WriteXML -.-> ExceptionHandling
+    CheckTool -.-> ExceptionHandling
+    DeleteOldBin -.-> ExceptionHandling
+    CheckConfigFile -.-> ExceptionHandling
+    CreateConfig -.-> ExceptionHandling
+    CreateBatch -.-> ExceptionHandling
+    ExecuteBatch -.-> ExceptionHandling
+    CheckBin -.-> ExceptionHandling
+    CopyBin -.-> ExceptionHandling
+    WriteOA3 -.-> ExceptionHandling
+    CheckWriteResult -.-> ExceptionHandling
+    CheckErrorType -.-> ExceptionHandling
+    CheckErrorMsg -.-> ExceptionHandling
+    EraseOA3 -.-> ExceptionHandling
+    CheckEraseResult -.-> ExceptionHandling
+    AddResult -.-> ExceptionHandling
+```
 - WriteNumberCheck
 
 #### FRT.bat
