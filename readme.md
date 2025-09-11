@@ -636,6 +636,37 @@ HWPSIWrite() //若PSI ver错误则写入，"%~dp0OtherTool\METools\FlashTool\WIN
 // OtherTool\WtDevTools.exe -CheckDeviceList 1
 // OtherTool\Bat\getmac.bat
 #region Write OA3
+// 从MES获取OA3标志位OA3DATA.ProductKey & OA3DATA.ProductKeyID
+// 构建OA3配置XML, OtherTool\OA3tool\x86\FileBasedInput.xml
+OA3CFG.Append("<?xml version=\"1.0\"?>\n");
+OA3CFG.Append("<Key>\n");
+OA3CFG.Append("  <ProductKeyState>2</ProductKeyState>\n");
+OA3CFG.AppendFormat("  <ProductKey>{0}</ProductKey>\n", OA3DATA.ProductKey);
+OA3CFG.AppendFormat("  <ProductKeyID>{0}</ProductKeyID>\n", OA3DATA.ProductKeyID);
+OA3CFG.Append("</Key>\n");
+// 创建配置文件（如果不存在）OtherTool\OA3tool\x86\config.cfg
+File.WriteAllText(OA3ToolDir + "config.cfg", "<OA3>\n    <FileBased>\n        <InputKeyXMLFile>FileBasedInput.xml</InputKeyXMLFile>\n    </FileBased>\n    <OutputData>\n        <AssembledBinaryFile>oa3.bin</AssembledBinaryFile>\n        <ReportedXMLFile>oa3.xml</ReportedXMLFile>\n    </OutputData>\n</OA3>\n");
+// 创建构建OA3的批处理文件
+var buildoa3Bat = OA3ToolDir + "BuildOA3.bat";
+File.WriteAllText(buildoa3Bat, "del oa3.bin \n timeout 1 \n oa3tool.exe /Assemble /Configfile=config.cfg\n");
+// 执行批处理文件构建OA3
+// 调用InsydeWriteOA3中的Write方法写入OA3数据
+exe = AppDomain.CurrentDomain.BaseDirectory + @"OtherTool\InsydeH2OOAE\H2OOAE-Wx64.exe";
+// Write方法：写入OA3文件到系统
+// 执行比较命令，检查OA3文件与系统当前状态
+Generic.GenericFun.GetExecResult(exe, string.Format("-C {0}", OA3FileName));
+// 1. 如果MSDM表不存在，需要写入OA3
+// 执行写入命令，-W表示写入，-S表示静默模式
+Generic.GenericFun.GetExecResult(exe, string.Format("-W {0} -S", OA3FileName));
+// 2. 如果系统OA密钥与文件不匹配，需要先擦除再处理
+// 执行擦除命令，-E表示擦除，-S表示静默模式
+Generic.GenericFun.GetExecResult(exe, "-E -S");
+// 3. 如果系统OA密钥与文件匹配，无需操作
+// 如果写入成功，重启系统
+// 处理不需要写入OA3的情况
+// 调用InsydeWriteOA3中的Erase方法擦除OA3数据
+// Erase方法：擦除系统中的OA3数据
+Generic.GenericFun.GetExecResult(exe, "-E -S");
 #region Write NFCKey
 // OtherTool\NFCTool\NFCInfoTool.exe 8
 #region WriteBtMCUMac
@@ -643,6 +674,7 @@ HWPSIWrite() //若PSI ver错误则写入，"%~dp0OtherTool\METools\FlashTool\WIN
 #region CheckBtMCUMa 
 // 无实际作用，直接return TestState.PASS
 ```
+- Write OA3流程图
 ```mermaid
 flowchart TD
     Start[开始Write OA3流程] --> CheckConfig{检查OA3配置是否启用}
@@ -733,6 +765,33 @@ flowchart TD
     AddResult -.-> ExceptionHandling
 ```
 - WriteNumberCheck
+```C#
+#region BIOS INFO
+#region GET MES WRITE SN DATA
+
+#region Check Write Data
+#region Type0Vendor
+#region Type1Manufacturer
+#region TYPE1ProductName
+#region TYPE1Version
+#region Type1SerialNumber
+#region Type1SKUNumber
+#region Type1Family
+#region Type2Manufacturer
+#region Type2AssetTag
+#region Type2Product
+#region Type2Version
+#region Type2SerialNumber
+#region Type3Manufacturer
+#region Type3AssetTag
+#region Type3Version
+#region Type3SerialNumber
+#region Type3SKUNumber
+#region Type11Strings
+#region PSI Version Check
+#region UUID
+#region WIFI BT MAC CHECK
+```
 
 #### FRT.bat
 ```batch
