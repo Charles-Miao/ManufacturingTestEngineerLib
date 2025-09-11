@@ -767,30 +767,61 @@ flowchart TD
 - WriteNumberCheck
 ```C#
 #region BIOS INFO
+// OtherTool\WtDevTools.exe -CheckSMBIOS
 #region GET MES WRITE SN DATA
-
-#region Check Write Data
+// 获取MES写入的SN数据
 #region Type0Vendor
+// 比对MES和读取的值
 #region Type1Manufacturer
+// 比对MES和读取的值
 #region TYPE1ProductName
+// 比对MES和读取的值
 #region TYPE1Version
+// 比对MES和读取的值
 #region Type1SerialNumber
+// 比对MES和读取的值
 #region Type1SKUNumber
+// 比对MES和读取的值
 #region Type1Family
+// 比对MES和读取的值
 #region Type2Manufacturer
+// 比对MES和读取的值
 #region Type2AssetTag
+// 比对MES和读取的值
 #region Type2Product
+// 比对MES和读取的值
 #region Type2Version
+// 比对MES和读取的值
 #region Type2SerialNumber
+// 比对MES和读取的值
 #region Type3Manufacturer
+// 比对MES和读取的值
 #region Type3AssetTag
+// 比对MES和读取的值
 #region Type3Version
+// 比对MES和读取的值
 #region Type3SerialNumber
+// 比对MES和读取的值
 #region Type3SKUNumber
+// OtherTool\InsydeH2OSDE\H2OSDE-Wx64.exe -CSKU
+// 比对MES和读取的值
 #region Type11Strings
+pros.GetExecResult(mBiosExe, string.Format(" -OS {0}", stringIndex));
+// 比对MES和读取的值
 #region PSI Version Check
+// 拦截PSI FLAG首位为1的情况
+// OtherTool\WtDevTools.exe -RWHWPSI R
+// 比对MES和读取的值
+// OtherTool\WtDevTools.exe -RHWPSI3
 #region UUID
+// 比对写的和读出来的UUID
+// Writed UUID
+File.ReadAllText("temp\\uuid.txt").Trim();
+// Read UUID
+pros.GetExecResult(mBiosExe, " -SU");
 #region WIFI BT MAC CHECK
+// OtherTool\\Bat\\getmac.bat，获取WIFI和BT的MAC地址，从ipconfig /all中提取
+// 检查读取出来的MAC地址长度，以及和MES里面的是否一致
 ```
 
 #### FRT.bat
