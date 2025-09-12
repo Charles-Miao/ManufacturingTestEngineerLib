@@ -836,12 +836,39 @@ call NoteBookTest.exe N69528_FRT_4H
 #### NoteBookTest.exe N69528_FRT_4H
 - BatteryTest，同上
 - ColdBootOneTimeTest
+```C#
+#region Check Current Cycle
+// 测试圈数&StartTime记录在注册表中
+#region CHECK TIMEOUT
+// 检查冷启动是否超时
+// StartTime-BootTime，是否超出spec
+// 检查AC电源是否有插
+// 如果测试圈数大约规定值，则pass，并透过EC指令关闭冷启动测试模式
+#region Check Device YB
+GenericFun.CheckDeviceYellowMark("ColdBoot")
+// OtherTool\DeviceYellowCheck\DeviceYellowCheck.exe
+// 检查结果文件是否包含 "result=pass"
+// 若有黄标，并为ColdBoot（冷启动）和WarmBoot（热启动）测试项目，当设备检查工具检测到包含"Error"和"FTSC"的错误时，允许最多重试2次，避免因临时性故障导致测试失败，第三次失败，重置失败次数为0，返回false表示最终失败
+// 若为生产环境则立即失败，若为调试环境忽略失败，则记录失败次数
+#endregion
+// 设置EC冷启动测试模式和时间
+// 当进入冷启动测试模式后，EC会在系统关机后等待SetCBTime设定的时间后自动开机
+X86BIOS.BiosFactory.GetSMBIOS(mMainCfg.AbsoluteSysCfg.CurrentCustomer).mEC.SetColdBootTestMode(true)
+X86BIOS.BiosFactory.GetSMBIOS(mMainCfg.AbsoluteSysCfg.CurrentCustomer).mEC.SetColdBoot(mMainCfg.ColdTestCfg.SetCBTime))
+// 设置开机自动运行当前程序
+// 更新注册表中的当前圈数
+// 保存启动时间到注册表
+// PD Reset - 内存操作，冷启动测试的关键准备工作，确保系统在重启前电源管理相关寄存器处于正确的状态
+// 执行关机批处理文件，shutdown.exe -s -t 5
+```
 - MemoryTest
 - CheckEcTest
-- Flash Blos
+- FlashBiosTest，同上
 - ParallelTest
 - ColdBootTest
-- CPUTest/S3Test/S4Test
+- CPUTest
+- S3Test
+- S4Test
 - GraphicsTest
 - FanTest，同上
 - OledcheckSumTest
