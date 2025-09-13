@@ -877,9 +877,38 @@ X86BIOS.BiosFactory.GetSMBIOS(mMainCfg.AbsoluteSysCfg.CurrentCustomer).mEC.SetCo
 // 3. testFlag测试标志文件存在时表示已完成Memtest86测试，使用Memtest86PlusResult.exe工具检查测试结果，最多尝试5次检查结果
 ```
 - CheckEcTest
+```C#
+// 1. 初始化和电量检查
+// 如果电池电量低于31%，等待充电至31%以上
+// 设置电池浮充模式和40%的浮充限制
+// 2. 工厂模式检查
+// 检查EC的工厂模式(Mfg)状态
+// 如果未开启，尝试开启工厂模式
+// 3. 获取本地BIOS版本
+// mWtDevTool.exe -CheckSMBIOS
+// 如果无法获取本地BIOS版本，测试失败
+// 4. 读取主板型号进行不同处理，(Get-CimInstance Win32_ComputerSystem).OEMStringArray[3]
+// 4.1 如果主板型号包含FBMTL，则测试结束
+// 4.2 如果主板型号包含FBARL，则继续处理
+// 4.3 删除自动运行设置
+// 4.4 如果BIOS版本等于1.07_SRAM，则进行SRAM CRC检查
+// 透过EC指令检查SRAM CRC状态
+// 4.5 如果BIOS版本不等于1.07_SRAM，则刷写BIOS
+// 检查刷写标志文件是否存在，存在则删除并标记测试失败
+// 检查特殊BIOS可执行文件是否存在，不存在则标记测试失败
+// 设置自动运行当前程序
+// 创建刷写标志文件
+// 启动BIOS刷写程序 specailBiosExe
+// 等待6分钟（360000毫秒）后退出当前程序 Environment.Exit(0)
+// 5. 测试结束处理
+// 删除刷写标志文件
+// 刷完BIOS后EC会被reset, 所以透过EC指令将电池设置为learning mode防止电量充满
+// 透过EC指令，禁用lid测试模式
+```
 - FlashBiosTest，同上
 - ParallelTest
 - ColdBootTest
+- WarmBootTest
 - CPUTest
 - S3Test
 - S4Test
