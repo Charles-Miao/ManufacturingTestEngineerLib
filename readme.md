@@ -862,6 +862,20 @@ X86BIOS.BiosFactory.GetSMBIOS(mMainCfg.AbsoluteSysCfg.CurrentCustomer).mEC.SetCo
 // 执行关机批处理文件，shutdown.exe -s -t 5
 ```
 - MemoryTest
+```C#
+// 1. 初始化设定(文件路径/删除自启动程序)
+// 2. 首次执行testFlag标志文件不存在
+// 2.1 设置自动启动程序，以及配置档案
+// 2.2 执行 start.bat 启动Memtest86内存测试
+// 禁用secure boot，InsydeH2OUVE\H2OUVE-W-CONSOLEx64.exe -ms -fi "Secure Boot" -op "Disable"
+// 挂载 EFI 系统分区到 S: 盘符
+// 备份原始的 Windows 引导程序 (bootmgfw.efi)
+// 用 Memtest86 的 EFI 程序替换 Windows 引导程序
+// 2.3 创建测试标志文件 memtest86.txt
+// 2.4 强制重启系统 (shutdown.exe -r -f -t 5) 进入Memtest86测试环境
+// 测试完成后，Memtest86 会重新启动系统
+// 3. testFlag测试标志文件存在时表示已完成Memtest86测试，使用Memtest86PlusResult.exe工具检查测试结果，最多尝试5次检查结果
+```
 - CheckEcTest
 - FlashBiosTest，同上
 - ParallelTest
