@@ -289,7 +289,7 @@ call NoteBookTest.exe N69528_FAT
 #region KeyBoard Test Show
 //在 UI 线程中执行键盘测试界面显示操作
 //显示键盘测试对话框并等待用户操作
-                dlg.ShowDialog();
+    dlg.ShowDialog();
 //OtherTool\BTMCU\LogTools.exe remove kbd, 执行厂商结束操作测试
 //设置 Fn 键退出测试模式
 //设置 Fn 键退出功能模式
@@ -942,9 +942,25 @@ X86BIOS.BiosFactory.GetSMBIOS(mMainCfg.AbsoluteSysCfg.CurrentCustomer).mEC.SetCo
 ```
 - CPUTest
 ```C#
-
+// 检测CPU类型并创建对应的测试实例
+if ((_cpuCaption = BaseCpu.GetCpuCaption()).ToUpper().Contains("INTEL"))
+    _CPU = new Intel_Cpu(); // 创建Intel CPU测试实例
+else
+    _CPU = new Amd_Cpu(); // 创建AMD CPU测试实例
 ```
-- S3Test
+- S3Test，挂起到内存，是一种电源管理测试，验证系统能否正常进入和退出睡眠状态
+```C#
+// 1. 根据平台类型（ARM/X86）复制相应的 pwrtest.exe 工具
+// 2. 检查AC电源是否连接, 无AC电源则测试失败
+// 3. 如果第一次运行，设置当前圈数为1，重置驱动失败计数器为0，重启计算机一次（确保干净的初始状态）
+// 4. 使用 do-while(true) 循环执行测试，直到满足退出条件
+// 4.1 黄标检查
+// 4.2 执行S3测试批处理，pwrtest.exe /cs /p:30 /d:60 /delaywrite /ln:MStest_log
+// 4.3 单圈时间检查, 计算单次S3循环耗时, 检查是否超过配置的时间限制
+// 4.4 日志分析和检查，检查日志中是否包含正确的S3进入和退出记录，解析日志中的时间戳进行双重时间验证
+// 4.5 如果时间检查失败，允许最多2次重试
+// 4.6 总测试时间检查，如果达到总的配置测试时间，退出循环
+```
 - S4Test
 - GraphicsTest
 - FanTest，同上
