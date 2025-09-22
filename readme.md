@@ -907,7 +907,25 @@ X86BIOS.BiosFactory.GetSMBIOS(mMainCfg.AbsoluteSysCfg.CurrentCustomer).mEC.SetCo
 ```
 - FlashBiosTest，同上
 - ParallelTest
+```C#
+
+```
 - ColdBootTest
+```C#
+// 1. 从注册表读取当前测试圈数CurrentCycle，若无则初始化1，并将驱动失败次数DriverFailCount初始化为0
+// 2. 冷启动时长检查
+// 2.1 获取系统启动时间SysBootTime赋值给_EndTime
+// 2.2 从注册表中读取开始时间赋值给_StartTime
+// 2.3 计算冷启动周期时间_EndTime - _StartTime是否超出规格，如果超出则fail
+// 3. 检查AC电源状态CheckACState()
+// 4. 检查是否完成所有测试圈数
+// 4.1 如果当前圈数大于配置的总圈数，测试完成，并禁用EC冷启动测试模式
+// 5. 检查设备黄色标记，具体逻辑参见ColdBootOneTimeTest
+// 6. 设置EC冷启动测试模式和冷启动时间
+// 7. 设置自动运行, 保存当前圈数到注册表, 保存开始时间到注册表
+// 8. PD Reset - 内存操作，冷启动测试的关键准备工作，确保系统在重启前电源管理相关寄存器处于正确的状态
+// 9. 执行CB.bat批处理文件关机
+```
 - WarmBootTest
 - CPUTest
 - S3Test
