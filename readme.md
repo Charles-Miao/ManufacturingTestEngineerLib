@@ -973,7 +973,23 @@ else
 // 3.5 检查循环时间是否超时
 // 3.6 检查是否达到配置的总测试时间，达到则测试通过，退出循环
 ```
-- GraphicsTest
+- GraphicsTest，这是一个长时间运行的显卡性能测试，主要通过运行 3DMark 等图形基准测试工具来验证显卡性能和稳定性
+```C#
+// 1. 设置系统时间（规避3D Mark key过期）,检查AC电源状态
+// 2. 替换配置文件, 改成窗口模式跑
+// 3. 如果是AMD CPU，使用AMDSystemDeck.exe设置 CPU 功率限制（15W）
+// 4. 风扇速度，CPU温度，总图形功率记录到日志文件 GpuTest_FanSpeed_CpuTemperature.txt
+// 4.1 使用CheckRPMC.exe读取风扇转速
+// 4.2 透过EC指令获取所有温度传感器数据, 检查各传感器温度是否在配置范围内, 超过阈值则累计失败次数
+// 4.3 使用nvgputgp.exe， 获取NVIDIA GPU TGP（总图形功率）
+// 5. 根据配置创建运行 3DMark 的批处理文件run.bat
+// 6. 主循环
+// 6.1 执行3DMark测试run.bat
+// 6.2 启动监控线程检测 3DMark 进程是否仍在运行，如果不在运行则退出，最多等待10分钟，超时则强制结束所有 3DMark 进程
+// 6.3 如果总循环次数或者总测试时间达标，则标记recordstate=true，并退出循环
+// 7. 等待记录线程结束，并检查温度传感器失败次数，超过阈值则标记测试失败
+// 8. 测试结束，调用SyncServerTime()同步时间
+```
 - FanTest，同上
 - OledcheckSumTest
 - ShutdownCheck
