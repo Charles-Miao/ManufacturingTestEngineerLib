@@ -991,7 +991,22 @@ else
 // 8. 测试结束，调用SyncServerTime()同步时间
 ```
 - FanTest，同上
-- OledcheckSumTest
+- OledcheckSumTest，这是一个专门针对 OLED 显示屏的测试，通过显示特定图像并读取校验和来验证显示屏功能，同时进行 LVD 和 PCD 硬件测试。
+```C#
+// 1. 结束气泡屏保程序BubbleScreenSaver.exe
+// 2. 定义三个测试图像文件路径：gram_checksum_1.bmp; gram_checksum_2.bmp; gram_checksum_3.bmp
+// 3. 屏幕CheckSum校验测试
+// 3.1 显示图片，dlg.ShowDialog()
+// 3.2 透过EC指令StartReadCheckSum()，确认I2C communication正常
+// 3.3 透过EC指令获取OLED checksum值，读取5次
+// 3.4 检查所有checksum值是否一致，不一致则FAIL
+[系统] → [显示数据] → [OLED控制器] → [屏幕显示] → [Checksum计算]
+                             ↓
+                        [返回校验值]
+// 4. LVD 和 PCD 硬件测试（LVD Low Voltage Detection 低电压检测，PCD Power Control Detection 电源控制检测）
+// 4.1 透过EC指令读取LVD和PCD硬件状态，并检查结果
+// 5. 测试结束，开启BubbleScreenSaver.exe
+```
 - ShutdownCheck
 - CheckTimeSequend
 
