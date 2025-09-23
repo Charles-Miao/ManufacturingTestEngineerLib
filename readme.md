@@ -1007,7 +1007,12 @@ else
 // 4.1 透过EC指令读取LVD和PCD硬件状态，并检查结果
 // 5. 测试结束，开启BubbleScreenSaver.exe
 ```
-- ShutdownCheck
+- ShutdownCheck，这是一个验证系统关机和重启过程是否正常的测试，通过强制重启并检查ETW事件日志来检测是否存在异常关机事件
+```C#
+// 1. 首次运行，设置自动运行程序，创建重启标志文件，执行强制重启
+// 2. 删除重启标志文件
+// 3. ETW是Windows提供的一种高效的事件跟踪机制，EventTrace.exe利用这一机制来监控和分析系统关机过程中的各种事件，从而验证关机过程是否正常完成
+```
 - CheckTimeSequend
 
 ### Burn-in LED
