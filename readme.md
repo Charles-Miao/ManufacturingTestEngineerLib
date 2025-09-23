@@ -1013,7 +1013,10 @@ else
 // 2. 删除重启标志文件
 // 3. ETW是Windows提供的一种高效的事件跟踪机制，EventTrace.exe利用这一机制来监控和分析系统关机过程中的各种事件，从而验证关机过程是否正常完成
 ```
-- CheckTimeSequend
+- CheckTimeSequence，这是一个专门检查 EC (Embedded Controller) RAM 中特定时间序列模式的测试，用于验证 EC 固件中是否存在不期望的时间序列数据
+```C#
+// CSECMemoryReader.exe读取嵌入式控制器(EC)的RAM数据并保存到二进制文件中，并解析这个二进制文件
+```
 
 ### Burn-in LED
 
