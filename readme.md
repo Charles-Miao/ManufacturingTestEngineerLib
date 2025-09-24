@@ -906,7 +906,7 @@ X86BIOS.BiosFactory.GetSMBIOS(mMainCfg.AbsoluteSysCfg.CurrentCustomer).mEC.SetCo
 // 透过EC指令，禁用lid测试模式
 ```
 - FlashBiosTest，同上
-- ParallelTest
+- ParallelTest？
 ```C#
 
 ```
@@ -943,10 +943,56 @@ X86BIOS.BiosFactory.GetSMBIOS(mMainCfg.AbsoluteSysCfg.CurrentCustomer).mEC.SetCo
 - CPUTest
 ```C#
 // 检测CPU类型并创建对应的测试实例
-if ((_cpuCaption = BaseCpu.GetCpuCaption()).ToUpper().Contains("INTEL"))
-    _CPU = new Intel_Cpu(); // 创建Intel CPU测试实例
-else
-    _CPU = new Amd_Cpu(); // 创建AMD CPU测试实例
+_CPU = new Intel_Cpu(); // 创建Intel CPU测试实例，这是一个全面的 CPU 性能和稳定性测试，使用 Intel TAT (Turbo Boost Technology) 工具进行压力测试，同时监控 CPU 频率、温度、功耗等关键参数
+// 1. 系统和硬件配置
+// 1.1 使用powercfg设置系统位高性能模式，禁用显示器和胸痛待机超时
+// 1.2 使用EC指令将风扇设定位测试模式，并设定风扇转速
+// 2. 启动数据记录线程
+// 2.1 透过EC指令读取充电器、CPU、内存、CPU VR、5V电源、环境、Type-C接口温度传感器温度
+// 2.2 通过CheckRPMC.exe读取风扇转速
+// 2.3 将读取到的数据记录到日志中
+// 3. 执行CPU负载测试
+// 3.1 启动独立的线程，运行SingleBurnLogger2.bat 批处理文件
+// 3.2 如果TAT连接失败，自动重启系统并重新执行测试
+// 4. 等待测试完成
+// 等待CPU负载测试完成
+WaitCpuLoadingTest.WaitOne();
+// 等待数据记录完成
+WaitRecordEndEvent.WaitOne();
+// 5. 测试结果分析
+// 5.1 计算每个NTC最后5分钟的平均温度是否在70-74度范围内
+// 5.2 查找TAT日志文件，并备份日志
+// 5.3 调用 CheckCpuFreqInfo 方法分析CPU频率、功耗和温度
+// 5.3.1 读取TAT日志文件逐行分析
+// 5.3.2 解析日志标题行，确定CPU频率、功耗、温度等列的位置
+// 5.3.3 检查CPU核心频率是否低于设定的最低频率，连续20次所有核心频率低于限制则测试失败
+// 5.3.4 计算最后5分钟平均功耗，检查是否超过44W规格限制
+// 5.3.5 计算最后5分钟平均温度，根据CPU类型设置不同温度限制并检查
+// 5.3.6 检查是否存在连续3秒温度超过上限的情况
+// 6. 测试结束，并返回结果
+// 将风扇转速设为0并退出风扇测试模式
+_CPU = new Amd_Cpu(); // 创建AMD CPU测试实例，这是一个针对 AMD CPU 的全面性能和稳定性测试，使用 AMD Validation Toolkit (AVT) 和 SystemDeck 工具进行压力测试，同时监控 CPU 功耗、温度、风扇转速等关键参数
+// 1. 热管理模式设置，先透过EC指令读取，如果是则继续，如果不是，则透过EC指令设置
+// 2. 透过AMDSystemDeck.exe进行系统监控
+// 3. 启动数据记录线程
+// 3.1 透过EC指令读取所有温度传感器数据
+// 3.1.1 检查 CPU 温度是否超限，连续超限30次则标记温度检查失败
+// 3.1.2 检查温度传感器是否正常工作（值小于1认为故障），连续故障50次则标记传感器检查失败
+// 3.2 透过EC指令读取风扇转速数据
+// 4. 执行CPU负载测试
+// 4.1 构建批处理AmdCpuLoading.bat，主要使用AVT.exe
+// 4.2 执行AVT测试AmdCpuLoading.bat
+// 4.3 监控测试进程AVT是否结束，进程结束则通知主线程
+// 5. 主线程等待 CPU 负载测试和数据记录完成
+// 6. 测试结束处理
+// 6.1 创建终止文件通知 SystemDeck 停止监控
+// 6.2 复制 SystemDeck 日志文件到项目日志目录，透过ReadTestData()最多尝试2次读取和分析测试数据
+// 6.2.1 解析 SystemDeck 生成的日志文件
+// 6.2.2 查找 CPU 功耗数据列位置
+// 6.2.3 检查功耗是否低于阈值(19毫瓦)
+// 6.2.4 连续异常55次则标记功耗检查失败
+// 6.3 尝试3次恢复为平衡模式(0x01)
+// 7. 检查功耗、温度、传感器各项指标，任一项失败则整个测试失败
 ```
 - S3Test，挂起到内存，是一种电源管理测试，验证系统能否正常进入和退出睡眠状态
 ```C#
@@ -1001,8 +1047,8 @@ else
 // 3.3 透过EC指令获取OLED checksum值，读取5次
 // 3.4 检查所有checksum值是否一致，不一致则FAIL
 [系统] → [显示数据] → [OLED控制器] → [屏幕显示] → [Checksum计算]
-                             ↓
-                        [返回校验值]
+     ↓
+[返回校验值]
 // 4. LVD 和 PCD 硬件测试（LVD Low Voltage Detection 低电压检测，PCD Power Control Detection 电源控制检测）
 // 4.1 透过EC指令读取LVD和PCD硬件状态，并检查结果
 // 5. 测试结束，开启BubbleScreenSaver.exe
