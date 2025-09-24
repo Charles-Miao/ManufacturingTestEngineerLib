@@ -1058,62 +1058,61 @@ rem 退出风扇测试模式
 ```
 
 #### NoteBookTest.exe N69528_FFT
-- 静音房
-```plaintext
-FanTest
-NoiseTest
-```
-- LCD AOI
+- FanTest，同上
+- NoiseTest
+- DustTest
+- AutoCentrationTest
+- AutoLCDTest
 ```plaintext
 程式与ITC_AOI.exe交互测试
 DUT打开测试工具，通过二维码wifi连接设备
 DUT分别切换白灰黑，红绿蓝画面,设备进行拍照分析
 ```
-- LCD Mura
+- AutoMuraTest
 ```plaintext
 程式与ITC_Mura.exe交互测试
 设备相机识别DUT桌面二维码获取产品信息进行测试
 通过WIFI指令分别切屏，进行90°垂直平面和45°斜拍测试
 使用成像色度仪进行计算
 ```
-- LCD色域
+- AutoColorCalibrationTest
 ```plaintext
 程式与ITC_CCA.exe交互测试
 设备相机识别DUT桌面二维码获取产品信息进行测试
 产品切104张图片并同时切换到Native状态运行荣耀色域算法计算
 测试完成将算法计算的数据写入产品BIOS
 ```
-- 指纹自动化测试
+- AutoFingerTest
 ```plaintext
 程式与FPCProductionTestTool.exe交互测试
 设备相机识别DUT桌面二维码开始测试
 设备的假手指移动到开机按钮触摸指纹
 ```
-- 摄像头测试
+- AutoCameraTest
 ```plaintext
 程式与AutoWebCam.exe交互测试
 DUT工具分析拍摄结果
 ```
-- 键盘测试
+- AutoKeyboardTest
 ```plaintext
 程式与KeyboardTP.exe交互测试
 设备相机模组识别DUT桌面二维码获取键盘国别信息并开始测试
 设备机械滚轮分别从左上到右下依次滑过DUT键盘的每个键
 ```
-- 触摸板功能测试
+- TouchPadTest？
 ```plaintext
 程式与GFMPTest.exe交互测试
 机械手从左往右从上至下依次划十字形，工具接收到触碰板反馈的X,Y轴10组不同的值
 机械手按压左右按键/空格键左中右三个区域，通过判定划线长度大于1000和按键scancode判断功能是否正常
 ```
-- LED测试
+- AutoLEDTest
 ```plaintext
 通过WT_LEDTEST.exe交互测试
 根据项目配置表是否有键盘背光 ，自动配置工具
 设备相机模组识别DUT桌面二维码，发送指令开始测试
 程序控制打开DUT灯，设备相机拍摄，灯灭灯亮图片进行解析
 ```
-- NFC测试
+- AutoNFCTest
 ```plaintext
 DUT进入夹具，夹具光感器识别到DUT到位后，工具开始测试
 通过读卡器读取NFC已写入的数据，上机位扫描DUT SN,从MES中获取老化写入的NFC字符和源数据作比对
@@ -1127,13 +1126,13 @@ DUT进入夹具，夹具光感器识别到DUT到位后，工具开始测试
 ```plaintext
 OP合盖起来打开是否可以正常唤醒
 ```
-- LCDTest
+- LCDTest，同上
 ```plaintext
 1.工具自动调整背光亮度，从0到100以20%递增，100到0以30%递减，人员观察
 2.RGB测试：红绿蓝白黑五种画面变化，图片变化，人员观察
 ```
 
-#### RF
+- WifiTest，同上
 - [测试原理和调试方法](https://github.com/Charles-Miao/ManufacturingTestEngineerLib/tree/master/Branded/NoteBook/RF/测试原理和调试方法.md)
 
 #### Audio
@@ -1150,71 +1149,20 @@ rem Wmic Baseboard Get SerialNumber /Value, 读取PCBSN
 call NoteBookTest.exe N69528_SWDL/ N69528_SWDL_NoWriteOA3 rem 写入or不写OA3
 ```
 
-#### N69528_SWDL
-- MES Station Check
-```plaintext
-SWDL工具读取主板中的MBSN
-通过MES接口获取对应的ASSY SN
-通过ASSY SN获取MES中SWDL站点状态
-如果获取SWDL站点状态信息是pass,则去获取工单配置数据
-```
-- WriteNumberCheck
-```plaintext
-WriteNumberCheck
-MainboardTest
-TPMTest
-METest
-FanTest
-CheckTimeSequence
-WriteNumber(Write OA3)
-```
-- SWDL2 start
+#### NoteBookTest.exe N69528_SWDL/ N69528_SWDL_NoWriteOA3
+- WriteNumberCheck，同上
+- MainboardTest，同上
+- TPMTest，同上
+- METest，同上
+- FanTest，同上
+- CheckTimeSequence，同上
+- DiskTest，同上
+- WriteNumber(Write OA3)，同上
+
+#### SWDL2 start？
 ```plaintext
 核对项都Pass，设置PXE启动，再Preload切换到WinPE
 A_SWDL 结束后reboot ，进入PXE，下载WinPE
-```
-- CFG check
-```plaintext
-check EC MFG mode
-battery 电量管控
-Check station
-Config Check
-open MFGmode
-flash BIOS
-Check ME lock
-BIOS_load_default
-```
-- Get Preload version
-```plaintext
-通过SN在MES上获取对应SN的Preload版本信息
-```
-- Preload Image
-```plaintext
-通过preload版本信息从服务器下载对应版本配置文件preload version Bom_XML
-逐行解析Bom_XML获取所有module names,在服务器上下载对应modules
-使用DISM install image
-```
-- OA3 Process
-```plaintext
-调用oa3tool.exe /CheckEdition 检查OA3 key 与OS edition 是否匹配
-oa3tool.exe 生成OA3.xml
-MES_OA3_WI90119 获取OA3 ProductKeyID 与机器生成的OA3.xml 里的ProductKeyID 比对
-OA3.xml 到Preload 服务器
-调用MES_OA3_WI90134 check HardHash status
-```
-- Shipping Setting
-```plaintext
-进Audit mode安装driver,app,office，设置OOBE,电源选项,startlayout,电量管控（出货管控电量为50%-85%）,Onekey,PBR等，修改BCD 下次开机进MFG PE
-检测preload 结果
-lid enable
-Shipping mode setting
-EC EXIT MFG MODE
-check SecureBoot
-```
-- SWDL2 MES 过站
-```plaintext
-CHK_Barcode 显示屏显示电池电量（出货管控电量为50%-85%），整机二维码，下架人工扫描二维码和流程卡二维码一致pass过站，转到包装线（二维码内容：抽检标识 OBE/PASS+SN）
-show 工单号，相关配置信息
 ```
 
 #### startnet.cmd
@@ -1260,6 +1208,20 @@ x:\QRcode_check\QRcode_check.exe !QRcodeMSG!,%FGSN%3,%FGSN%,%WO%,%productName%  
 ```batch
 rem exitshipmode.cmd
 :exitshipmode rem 使用DumpIO.exe退出shipmode
+```
+#### Shipping Setting？
+```plaintext
+进Audit mode安装driver,app,office，设置OOBE,电源选项,startlayout,电量管控（出货管控电量为50%-85%）,Onekey,PBR等，修改BCD 下次开机进MFG PE
+检测preload 结果
+lid enable
+Shipping mode setting
+EC EXIT MFG MODE
+check SecureBoot
+```
+#### SWDL2 MES 过站？
+```plaintext
+CHK_Barcode 显示屏显示电池电量（出货管控电量为50%-85%），整机二维码，下架人工扫描二维码和流程卡二维码一致pass过站，转到包装线（二维码内容：抽检标识 OBE/PASS+SN）
+show 工单号，相关配置信息
 ```
 
 #### DUT_Config_Check_0625-cxl.CMD
@@ -1313,7 +1275,7 @@ REM 将boot.sdi，BootFromPE.cmd ，boot.wim复制到 c:\BOOT_MOPS\ 目录
 call c:\BOOT_MOPS\BootFromPE.cmd %LOGPATH%  REM 调用 c:\BOOT_MOPS\BootFromPE.cmd 脚本，传入日志文件路径参数
 ```
 
-#### call X:\PreloadGuide\MOPS.cmd %AODPATH% %MODULEPATH% %LOGPATH%
+##### call X:\PreloadGuide\MOPS.cmd %AODPATH% %MODULEPATH% %LOGPATH%
 ```batch
 :ImageWhiteListCheck rem 使用ImageWhitelist.exe读取BIOS中的机种名，并和AODSTAT.DAT读取的机种名进行比对，如果不一致则fail
 :AODMD5Verify rem MD5Verify.exe -f AODSTAT.DAT -c AODSTAT.md5，确认AODSTAT.DAT文件的MD5值和AODSTAT.md5中的值一致
@@ -1325,10 +1287,10 @@ rem stdout=7z.exe x j:\FBPartitionCheck02CN.zip -y -pWingtech -ox:\
 rem stdout=x:\DiskFormatCheck\setup.cmd %AODPATH%
 ```
 
-#### call W:\SWWORK\WinpeDoWork.cmd %AODPATH% %AODPATH%？
+##### call W:\SWWORK\WinpeDoWork.cmd %AODPATH% %AODPATH%？
 
-#### x:\DiskFormatCheck\setup.cmd %AODPATH%？
+##### x:\DiskFormatCheck\setup.cmd %AODPATH%？
 
-### OA3 process
+### OA3 process？
 
-### MES交互逻辑&卡控
+### MES交互逻辑&卡控？
