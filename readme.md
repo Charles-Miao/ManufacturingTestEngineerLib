@@ -1130,6 +1130,9 @@ rem 退出风扇测试模式
 #### NoteBookTest.exe N69528_FFT
 - FanTest，同上
 - NoiseTest
+```C#
+
+```
 - DustTest
 - AutoCentrationTest
 - AutoLCDTest
@@ -1187,7 +1190,8 @@ DUT工具分析拍摄结果
 DUT进入夹具，夹具光感器识别到DUT到位后，工具开始测试
 通过读卡器读取NFC已写入的数据，上机位扫描DUT SN,从MES中获取老化写入的NFC字符和源数据作比对
 ```
-- TouchPanel测试
+- TouchPanelTest，同上
+- AutoTouchPanelTest
 - Typce-C测试
 - USB3.0测试
 - HDMI测试
